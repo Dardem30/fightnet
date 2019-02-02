@@ -34,7 +34,7 @@ public class UserService implements UserDetailsService {
         if (userRepository.findByUsername(user.getUsername()) != null) {
             return "Sorry but user with this username already exists";
         }
-        user.setRoles(Collections.singleton(roleDAO.findByName("ADMIN")));
+        user.setRoles(Collections.singleton(roleDAO.findByName("ROLE_USER")));
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         return "successfully";
