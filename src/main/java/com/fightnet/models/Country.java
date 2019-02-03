@@ -7,14 +7,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Set;
 
-@Document(collection = "users")
+@Document(collection = "countries")
 @Data
-public class AppUser {
+public class Country {
     private ObjectId id;
-    private String username;
-    private String password;
+    private String name;
     @DBRef
-    private Set<Role> roles;
-    @DBRef
-    private City city;
+    private Set<City> cities;
 }
