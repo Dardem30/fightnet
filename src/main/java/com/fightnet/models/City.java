@@ -10,6 +10,4 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class City {
     private ObjectId id;
     private String name;
-    @DBRef
-    private Country country;
 }

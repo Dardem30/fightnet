@@ -16,5 +16,7 @@ public class AppUser {
     @DBRef
     private Set<Role> roles;
     @DBRef
+    private Country country;
+    @DBRef
     private City city;
 }
