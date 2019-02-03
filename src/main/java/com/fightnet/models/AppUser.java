@@ -13,6 +13,8 @@ public class AppUser {
     private ObjectId id;
     private String username;
     private String password;
+    private String name;
+    private String surname;
     @DBRef
     private Set<Role> roles;
     @DBRef
