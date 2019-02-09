@@ -15,8 +15,7 @@ public class AccessControlHeaderInterceptor extends HandlerInterceptorAdapter {
                              final Object handler) throws Exception {
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
-        response.setHeader("Access-Control-Allow-Methods",
-                "POST, GET");
+        response.setHeader("Access-Control-Allow-Methods", "POST, GET");
         response.setHeader("Access-Control-Max-Age", "3600");
         response.setHeader("Access-Control-Expose-Headers", "Authorization, Content-Type");
         return super.preHandle(request, response, handler);

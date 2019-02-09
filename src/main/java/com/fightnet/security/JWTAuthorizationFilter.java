@@ -3,15 +3,11 @@ package com.fightnet.security;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.HttpStatus;
+import com.fightnet.dataAccess.UserDAO;
+import com.fightnet.models.AppUser;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -19,21 +15,21 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.fightnet.security.SecurityConstants.*;
 
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
-    JWTAuthorizationFilter(AuthenticationManager authManager) {
+    private final UserDAO userRepository;
+
+    JWTAuthorizationFilter(final AuthenticationManager authManager, final UserDAO userRepository) {
         super(authManager);
+        this.userRepository = userRepository;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest req,
-                                    HttpServletResponse res,
-                                    FilterChain chain) throws IOException, ServletException {
+    protected void doFilterInternal(final HttpServletRequest req,
+                                    final HttpServletResponse res,
+                                    final FilterChain chain) throws IOException, ServletException {
         final String header = req.getHeader(HEADER);
 
         if (header == null || !header.startsWith(TOKEN_PREFIX)) {
@@ -41,9 +37,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
             return;
         }
 
-        final UsernamePasswordAuthenticationToken authentication = getAuthentication(req);
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        SecurityContextHolder.getContext().setAuthentication(getAuthentication(req));
         chain.doFilter(req, res);
     }
 
@@ -59,11 +53,10 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
                 logger.info("Wrong token", e);
                 return null;
             }
-            final String user = decodedJWT.getSubject();
-            if (user != null) {
-                return new UsernamePasswordAuthenticationToken(user, null, Arrays.stream(decodedJWT.getClaim("ROLES").asString().split(","))
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList()));
+            final String username = decodedJWT.getSubject();
+            if (username != null) {
+                final AppUser user = userRepository.findByUsername(username);
+                return new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), user.getRoles());
             }
         }
         return null;
