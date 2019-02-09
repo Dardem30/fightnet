@@ -21,4 +21,5 @@ public class AppUser {
     private Country country;
     @DBRef
     private City city;
+    private String description;
 }
