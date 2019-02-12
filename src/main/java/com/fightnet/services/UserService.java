@@ -5,7 +5,9 @@ import com.fightnet.dataAccess.RoleDAO;
 import com.fightnet.dataAccess.UserDAO;
 import com.fightnet.models.AppUser;
 import com.fightnet.models.Role;
+import com.fightnet.security.mail.EmailService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,6 +32,7 @@ public class UserService implements UserDetailsService {
     private final UserDAO userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final RoleDAO roleDAO;
+    private final EmailService emailService;
 
     @Override
     public final UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -41,13 +44,14 @@ public class UserService implements UserDetailsService {
     }
 
     public final String saveUser(final AppUser user) {
-        if (userRepository.findByUsername(user.getUsername()) != null) {
-            return "Sorry but user with this username already exists";
+        final AppUser appUser = userRepository.findByUsername(user.getUsername());
+        if (appUser != null && user.getCode() != null && !user.getCode().equals("") && user.getCode().equals(appUser.getCode())) {
+            appUser.setRegistered(true);
+            appUser.setCode(null);
+            userRepository.save(appUser);
+            return "successfully";
         }
-        user.setRoles(Collections.singleton(roleDAO.findByName("ROLE_USER")));
-        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
-        return "successfully";
+        return "Wrong code";
     }
 
     public final String deleteUserByUsername(final String username) {
@@ -73,7 +77,7 @@ public class UserService implements UserDetailsService {
 
     public String authenticate(final AppUser appUser) {
         final AppUser user = userRepository.findByUsername(appUser.getUsername());
-        if (user != null) {
+        if (user != null && user.isRegistered()) {
             SecurityContextHolder.getContext()
                     .setAuthentication(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), user.getRoles()));
             return JWT.create()
@@ -82,5 +86,18 @@ public class UserService implements UserDetailsService {
                     .sign(HMAC512(SECRET));
         }
         return null;
+    }
+
+    public String sendCode(final AppUser user) {
+        if (userRepository.findByUsername(user.getUsername()) != null) {
+            return "Sorry but user with this username already exists";
+        }
+        user.setRoles(Collections.singleton(roleDAO.findByName("ROLE_USER")));
+        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        user.setRegistered(false);
+        user.setCode(RandomStringUtils.randomAlphanumeric(10));
+        userRepository.save(user);
+        emailService.sendCodeMessage(user.getEmail(), "Fightnet регистрация", "Код: " + user.getCode());
+        return "successfully";
     }
 }

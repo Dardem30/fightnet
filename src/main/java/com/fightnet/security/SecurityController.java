@@ -18,10 +18,16 @@ import static com.fightnet.security.SecurityConstants.TOKEN_PREFIX;
 public class SecurityController {
     private final UserService userService;
 
+    @PostMapping("/sendCode")
+    public String sendCode(@RequestBody final AppUser user) {
+        return userService.sendCode(user);
+    }
+
     @PostMapping("/sign-up")
     public String signUp(@RequestBody final AppUser user) {
         return userService.saveUser(user);
     }
+
     @PostMapping("/login")
     public String login(HttpServletResponse response, @RequestBody final AppUser user) {
         final String token = userService.authenticate(user);

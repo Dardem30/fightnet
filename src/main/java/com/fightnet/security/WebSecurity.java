@@ -20,8 +20,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable().authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .antMatchers(HttpMethod.POST, "/security/sign-up").permitAll()
-                .antMatchers(HttpMethod.POST, "/security/login").permitAll()
+                .antMatchers(HttpMethod.POST, "/security/*").permitAll()
                 .antMatchers(HttpMethod.GET, "/util/getCountries").permitAll()
                 .antMatchers( "/login").permitAll()
                 .antMatchers("/util/**").permitAll()

@@ -14,10 +14,13 @@ import java.util.Set;
 @Data
 public class AppUser implements UserDetails{
     private ObjectId id;
+    private boolean isRegistered;
     private String username;
     private String password;
     private String name;
     private String surname;
+    private String email;
+    private String code;
     @DBRef
     private Set<Role> roles;
     @DBRef
