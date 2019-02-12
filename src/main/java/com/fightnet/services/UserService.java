@@ -43,9 +43,9 @@ public class UserService implements UserDetailsService {
         return new User(appUser.getUsername(), appUser.getPassword(), appUser.getRoles());
     }
 
-    public final String saveUser(final AppUser user) {
-        final AppUser appUser = userRepository.findByUsername(user.getUsername());
-        if (appUser != null && user.getCode() != null && !user.getCode().equals("") && user.getCode().equals(appUser.getCode())) {
+    public final String saveUser(final String username, final String code) {
+        final AppUser appUser = userRepository.findByUsername(username);
+        if (appUser != null && code != null && !code.equals("") && code.equals(appUser.getCode())) {
             appUser.setRegistered(true);
             appUser.setCode(null);
             userRepository.save(appUser);
