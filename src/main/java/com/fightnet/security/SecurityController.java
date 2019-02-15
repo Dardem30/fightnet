@@ -4,6 +4,7 @@ package com.fightnet.security;
 import com.fightnet.models.AppUser;
 import com.fightnet.services.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -15,17 +16,28 @@ import static com.fightnet.security.SecurityConstants.TOKEN_PREFIX;
 @RequestMapping("/security")
 @RequiredArgsConstructor
 @CrossOrigin
+@Slf4j
 public class SecurityController {
     private final UserService userService;
 
     @PostMapping("/sendCode")
     public String sendCode(@RequestBody final AppUser user) {
-        return userService.sendCode(user);
+        try {
+            return userService.sendCode(user);
+        } catch (Exception e) {
+            log.info("Sorry but user with this email already exists", e);
+            return "Sorry but user with this email already exists";
+        }
     }
 
     @PostMapping("/sign-up")
     public String signUp(@RequestParam("email") final String email, @RequestParam("code") final String code) {
-        return userService.saveUser(email, code);
+        try {
+            return userService.saveUser(email, code);
+        } catch (Exception e) {
+            log.info("Wrong code", e);
+            return "Wrong code";
+        }
     }
 
     @PostMapping("/login")

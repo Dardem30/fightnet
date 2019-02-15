@@ -40,15 +40,16 @@ public class UserService implements UserDetailsService {
         return new User(appUser.getUsername(), appUser.getPassword(), appUser.getRoles());
     }
 
-    public final String saveUser(final String email, final String code) {
+    public final String saveUser(final String email, final String code) throws Exception {
         final AppUser appUser = userRepository.findByEmail(email);
         if (appUser != null && code != null && !code.equals("") && code.equals(appUser.getCode())) {
             appUser.setRegistered(true);
             appUser.setCode(null);
             userRepository.save(appUser);
             return "successfully";
+        } else {
+            throw new Exception();
         }
-        return "Wrong code";
     }
 
     public final String deleteUserByEmail(final String email) {
@@ -77,9 +78,9 @@ public class UserService implements UserDetailsService {
         return null;
     }
 
-    public String sendCode(final AppUser user) {
+    public String sendCode(final AppUser user) throws Exception {
         if (userRepository.findByEmail(user.getEmail()) != null) {
-            return "Sorry but user with this email already exists";
+            throw new Exception();
         }
         user.setRoles(Collections.singleton(roleDAO.findByName("ROLE_USER")));
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
