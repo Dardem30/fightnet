@@ -20,6 +20,7 @@ public class AppUser implements UserDetails{
     private String surname;
     private String email;
     private String code;
+    private String timezone;
     @DBRef
     private Set<Role> roles;
     @DBRef

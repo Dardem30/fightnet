@@ -3,7 +3,9 @@ package com.fightnet.dataAccess;
 import com.fightnet.models.AppUser;
 import org.springframework.data.repository.CrudRepository;
 
+import java.util.List;
+
 public interface UserDAO extends CrudRepository<AppUser, Long> {
     AppUser findByEmail(String email);
-    void deleteByRegistered(boolean registered);
+    List<AppUser> findByRegistered(boolean registered);
 }

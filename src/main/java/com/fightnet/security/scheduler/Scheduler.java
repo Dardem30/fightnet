@@ -6,6 +6,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.Calendar;
+import java.util.TimeZone;
+
 @Component
 @EnableScheduling
 @RequiredArgsConstructor
@@ -14,6 +17,10 @@ public class Scheduler {
 
     @Scheduled(fixedDelay = 3600000)
     private void clearDatabase() {
-        userRepository.deleteByRegistered(false);
+        userRepository.findByRegistered(false).forEach(user -> {
+            if (Calendar.getInstance(TimeZone.getTimeZone(user.getTimezone())).getTime().getTime() - user.getId().getDate().getTime() >= 3600000) {
+                userRepository.delete(user);
+            }
+        });
     }
 }
