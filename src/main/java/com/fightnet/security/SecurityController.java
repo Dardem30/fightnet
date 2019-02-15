@@ -21,10 +21,11 @@ public class SecurityController {
     private final UserService userService;
 
     @PostMapping("/sendCode")
-    public String sendCode(@RequestBody final AppUser user) {
+    public String sendCode(final HttpServletResponse response, @RequestBody final AppUser user) {
         try {
             return userService.sendCode(user);
         } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             log.info("Sorry but user with this email already exists", e);
             return "Sorry but user with this email already exists";
         }
