@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin
 public class AdminController {
     private final UserService userService;
-    @GetMapping(value = "{username}")
-    public AppUser getUserByUsername(@PathVariable("username") String username) {
-        return userService.getUserByUsername(username);
+    @GetMapping(value = "{email}")
+    public AppUser getUserByUsername(@PathVariable("email") String email) {
+        return userService.getUserByEmail(email);
     }
 }

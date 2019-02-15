@@ -53,10 +53,10 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
                 logger.info("Wrong token", e);
                 return null;
             }
-            final String username = decodedJWT.getSubject();
-            if (username != null) {
-                final AppUser user = userRepository.findByUsername(username);
-                return new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), user.getRoles());
+            final String email = decodedJWT.getSubject();
+            if (email != null) {
+                final AppUser user = userRepository.findByEmail(email);
+                return new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword(), user.getRoles());
             }
         }
         return null;

@@ -24,8 +24,8 @@ public class SecurityController {
     }
 
     @PostMapping("/sign-up")
-    public String signUp(@RequestParam("username") final String username, @RequestParam("code") final String code) {
-        return userService.saveUser(username, code);
+    public String signUp(@RequestParam("email") final String email, @RequestParam("code") final String code) {
+        return userService.saveUser(email, code);
     }
 
     @PostMapping("/login")

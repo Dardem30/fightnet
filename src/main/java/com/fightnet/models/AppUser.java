@@ -14,8 +14,7 @@ import java.util.Set;
 @Data
 public class AppUser implements UserDetails{
     private ObjectId id;
-    private boolean isRegistered;
-    private String username;
+    private boolean registered;
     private String password;
     private String name;
     private String surname;
@@ -32,6 +31,11 @@ public class AppUser implements UserDetails{
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
     }
 
     @Override
