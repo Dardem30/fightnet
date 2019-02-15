@@ -25,9 +25,8 @@ public class SecurityController {
         try {
             return userService.sendCode(user);
         } catch (Exception e) {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             log.info("Sorry but user with this email already exists", e);
-            return "Sorry but user with this email already exists";
+            return "false";
         }
     }
 
@@ -37,7 +36,7 @@ public class SecurityController {
             return userService.saveUser(email, code);
         } catch (Exception e) {
             log.info("Wrong code", e);
-            return "Wrong code";
+            return "false";
         }
     }
 
