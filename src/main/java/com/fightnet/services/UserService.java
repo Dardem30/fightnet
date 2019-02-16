@@ -67,7 +67,7 @@ public class UserService implements UserDetailsService {
 
     public String authenticate(final AppUser appUser) {
         final AppUser user = userRepository.findByEmail(appUser.getEmail());
-        if (user != null && user.isRegistered()) {
+        if (user != null && user.getPassword().equals(appUser.getPassword()) && user.isRegistered()) {
             SecurityContextHolder.getContext()
                     .setAuthentication(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword(), user.getRoles()));
             return JWT.create()
