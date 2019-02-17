@@ -22,6 +22,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/security/*").permitAll()
                 .antMatchers(HttpMethod.GET, "/util/getCountries").permitAll()
+                .antMatchers("/user/**").permitAll()
                 .antMatchers( "/login").permitAll()
                 .antMatchers("/util/**").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")
