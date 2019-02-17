@@ -33,7 +33,7 @@ public class UserService implements UserDetailsService {
 
     @Override
     public final UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        final AppUser appUser = userRepository.findByEmail(email);
+        final AppUser appUser = findUserByEmail(email);
         if (appUser == null) {
             throw new UsernameNotFoundException(email);
         }
@@ -89,5 +89,8 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
         emailService.sendCodeMessage(user.getEmail(), "Fightnet регистрация", "Код: " + user.getCode());
         return "successfully";
+    }
+    public AppUser findUserByEmail(final String email) {
+        return userRepository.findByEmail(email);
     }
 }
