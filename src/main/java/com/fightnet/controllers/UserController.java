@@ -18,10 +18,10 @@ public class UserController {
 
     @GetMapping(value = "findUser")
     public ResponseEntity findUserByEmail(@RequestParam("email") final String email) {
-        final AppUser sourceUser = userService.findUserByEmail(email);
-        return ResponseEntity.ok(mapper.createTypeMap(sourceUser, UserDTO.class)
-                .addMapping(user -> user.getCountry().getName(), UserDTO::setCountry)
-                .addMapping(user -> user.getCity().getName(), UserDTO::setCity)
-                .map(sourceUser));
+        final AppUser user = userService.findUserByEmail(email);
+        final UserDTO userDTO = mapper.map(user, UserDTO.class);
+        userDTO.setCountry(user.getCountry().getName());
+        userDTO.setCity(user.getCity().getName());
+        return ResponseEntity.ok(userDTO);
     }
 }
