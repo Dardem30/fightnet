@@ -13,4 +13,14 @@ public class UserDTO {
     private String country;
     private String city;
     private String description;
+
+    public UserDTO setCountry(String country) {
+        this.country = country;
+        return this;
+    }
+
+    public UserDTO setCity(String city) {
+        this.city = city;
+        return this;
+    }
 }

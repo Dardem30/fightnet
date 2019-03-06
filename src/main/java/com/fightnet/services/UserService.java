@@ -1,12 +1,16 @@
 package com.fightnet.services;
 
 import com.auth0.jwt.JWT;
+import com.fightnet.controllers.search.UserSearchCriteria;
 import com.fightnet.dataAccess.RoleDAO;
 import com.fightnet.dataAccess.UserDAO;
+import com.fightnet.dataAccess.VideoDAO;
 import com.fightnet.models.AppUser;
+import com.fightnet.models.Video;
 import com.fightnet.security.mail.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -15,9 +19,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collections;
-import java.util.Date;
+import java.io.ByteArrayInputStream;
+import java.io.FileOutputStream;
+import java.util.*;
 
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 import static com.fightnet.security.SecurityConstants.EXPIRATION_TIME;
@@ -30,6 +36,7 @@ public class UserService implements UserDetailsService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final RoleDAO roleDAO;
     private final EmailService emailService;
+    private final VideoDAO videoRepository;
 
     @Override
     public final UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -90,7 +97,36 @@ public class UserService implements UserDetailsService {
         emailService.sendCodeMessage(user.getEmail(), "Fightnet регистрация", "Код: " + user.getCode());
         return "successfully";
     }
+
     public AppUser findUserByEmail(final String email) {
         return userRepository.findByEmail(email);
+    }
+
+    public void saveVideo(final MultipartFile file, final String email1, String email2) throws Exception {
+        final String[] fileParts = file.getOriginalFilename().split("\\.");
+        final String videoUrl = "videos/" + UUID.randomUUID().toString() + "." + fileParts[fileParts.length - 1];
+        try (final ByteArrayInputStream inputStream = new ByteArrayInputStream(file.getBytes());
+             final FileOutputStream outputStream = new FileOutputStream(videoUrl)) {
+            IOUtils.copy(inputStream, outputStream);
+        }
+        final AppUser fighter1 = userRepository.findByEmail(email1);
+        final AppUser fighter2 = userRepository.findByEmail(email2);
+        final Set<Video> fighter1Videos = fighter1.getVideos() == null ? new HashSet<>() : fighter1.getVideos();
+        final Set<Video> fighter2Videos = fighter2.getVideos() == null ? new HashSet<>() : fighter2.getVideos();
+        final Video video = new Video();
+        video.setFighter1(fighter1);
+        video.setFighter2(fighter2);
+        video.setLoaded(false);
+        video.setApproved(false);
+        video.setUrl(videoUrl);
+        videoRepository.save(video);
+        fighter1Videos.add(video);
+        fighter2Videos.add(video);
+        userRepository.save(fighter1);
+        userRepository.save(fighter2);
+    }
+
+    public List<AppUser> list(final UserSearchCriteria searchCriteria) {
+        return userRepository.findByNameLikeAndSurnameLikeAndDescriptionLike(searchCriteria.getName(), searchCriteria.getSurname(), searchCriteria.getDescription());
     }
 }

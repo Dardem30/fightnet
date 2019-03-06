@@ -24,6 +24,8 @@ public class AppUser implements UserDetails{
     @DBRef
     private Set<Role> roles;
     @DBRef
+    private Set<Video> videos;
+    @DBRef
     private Country country;
     @DBRef
     private City city;

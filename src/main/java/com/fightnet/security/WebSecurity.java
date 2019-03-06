@@ -2,9 +2,7 @@ package com.fightnet.security;
 
 import com.fightnet.dataAccess.UserDAO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -21,9 +19,6 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         http.csrf().disable().authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/security/*").permitAll()
-                .antMatchers(HttpMethod.GET, "/util/getCountries").permitAll()
-                .antMatchers("/user/**").permitAll()
-                .antMatchers( "/login").permitAll()
                 .antMatchers("/util/**").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
