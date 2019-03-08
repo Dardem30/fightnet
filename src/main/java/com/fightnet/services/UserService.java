@@ -143,10 +143,10 @@ public class UserService implements UserDetailsService {
             criteria.and("surname").regex(searchCriteria.getSurname(), "i");
         }
         if (searchCriteria.getCountry() != null) {
-            criteria.and("country").is(searchCriteria.getCountry());
+            criteria.and("country.id").is(searchCriteria.getCountry());
         }
         if (searchCriteria.getCity() != null) {
-            criteria.and("city").is(searchCriteria.getCity());
+            criteria.and("city.id").is(searchCriteria.getCity());
         }
         return operations.find(Query.query(criteria).limit(10), AppUser.class);
     }
