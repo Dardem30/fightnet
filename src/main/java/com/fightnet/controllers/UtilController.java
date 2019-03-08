@@ -42,7 +42,7 @@ public class UtilController {
                 .setCity(user.getCity().getName()));
     }
 
-    @GetMapping(value = "listUsers")
+    @PostMapping(value = "listUsers")
     public ResponseEntity<List<UserDTO>> listUsers(@RequestBody final UserSearchCriteria searchCriteria) {
         final List<UserDTO> result = userService.list(searchCriteria).stream()
                 .map(user -> mapper.map(user, UserDTO.class)
