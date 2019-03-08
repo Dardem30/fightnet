@@ -11,6 +11,9 @@ import com.fightnet.security.mail.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -37,6 +40,7 @@ public class UserService implements UserDetailsService {
     private final RoleDAO roleDAO;
     private final EmailService emailService;
     private final VideoDAO videoRepository;
+    private final MongoOperations operations;
 
     @Override
     public final UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -127,6 +131,23 @@ public class UserService implements UserDetailsService {
     }
 
     public List<AppUser> list(final UserSearchCriteria searchCriteria) {
-        return userRepository.findByNameLikeAndSurnameLikeAndDescriptionLike(searchCriteria.getName(), searchCriteria.getSurname(), searchCriteria.getDescription());
+        final Criteria criteria = new Criteria();
+        criteria.and("registered").is(true);
+        if (searchCriteria.getName() != null) {
+            criteria.and("name").regex(searchCriteria.getName(), "i");
+        }
+        if (searchCriteria.getDescription() != null) {
+            criteria.and("description").regex(searchCriteria.getDescription(), "i");
+        }
+        if (searchCriteria.getSurname() != null) {
+            criteria.and("surname").regex(searchCriteria.getSurname(), "i");
+        }
+        if (searchCriteria.getCountry() != null) {
+            criteria.and("country").is(searchCriteria.getCountry());
+        }
+        if (searchCriteria.getCity() != null) {
+            criteria.and("city").is(searchCriteria.getCity());
+        }
+        return operations.find(Query.query(criteria).limit(10), AppUser.class);
     }
 }
