@@ -51,4 +51,8 @@ public class UtilController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(result);
     }
+    @GetMapping(value = "bookPerson")
+    public void bookPerson(@RequestParam("currentUserEmail") final String currentUserEmail,@RequestParam("personEmail") final String personEmail) {
+        userService.bookPerson(currentUserEmail, personEmail);
+    }
 }

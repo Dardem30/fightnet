@@ -1,24 +1,27 @@
 package com.fightnet.models;
 
 import lombok.Data;
-import org.bson.types.ObjectId;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 @Document(collection = "users")
 @Data
+@NoArgsConstructor
 public class AppUser implements UserDetails{
-    private ObjectId id;
+    @Id
+    private String email;
     private boolean registered;
     private String password;
     private String name;
     private String surname;
-    private String email;
     private String code;
     private String timezone;
     @DBRef
@@ -30,6 +33,12 @@ public class AppUser implements UserDetails{
     @DBRef
     private City city;
     private String description;
+    @DBRef
+    private List<AppUser> bookedPeople;
+
+    public AppUser(String email) {
+        this.email = email;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

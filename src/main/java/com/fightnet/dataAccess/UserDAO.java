@@ -5,7 +5,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface UserDAO extends CrudRepository<AppUser, Long> {
+public interface UserDAO extends CrudRepository<AppUser, String> {
     AppUser findByEmail(String email);
     List<AppUser> findByRegistered(boolean registered);
 }

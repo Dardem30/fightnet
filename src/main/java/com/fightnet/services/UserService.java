@@ -150,4 +150,12 @@ public class UserService implements UserDetailsService {
         }
         return operations.find(Query.query(criteria).limit(10), AppUser.class);
     }
+
+    public void bookPerson(final String currentUserEmail, final String personEmail) {
+        final AppUser user = userRepository.findById(currentUserEmail).get();
+        final List<AppUser> bookedPeople = user.getBookedPeople();
+        bookedPeople.add(new AppUser(personEmail));
+        user.setBookedPeople(bookedPeople);
+        userRepository.save(user);
+    }
 }
