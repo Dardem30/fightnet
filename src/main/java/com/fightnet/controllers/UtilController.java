@@ -39,8 +39,13 @@ public class UtilController {
     @GetMapping(value = "findUser")
     public ResponseEntity findUserByEmail(@RequestParam("email") final String email) {
         final AppUser user = userService.findUserByEmail(email);
-        final List<BookedUser> bookedUsers = new ArrayList<>(user.getBookedPeople().size());
-        user.getBookedPeople().forEach(bookedPerson -> bookedUsers.add(mapper.map(bookedPerson, BookedUser.class)));
+        final List<BookedUser> bookedUsers;
+        if (user.getBookedPeople() != null) {
+            bookedUsers = new ArrayList<>(user.getBookedPeople().size());
+            user.getBookedPeople().forEach(bookedPerson -> bookedUsers.add(mapper.map(bookedPerson, BookedUser.class)));
+        } else {
+            bookedUsers = new ArrayList<>();
+        }
         return ResponseEntity.ok(mapper.map(user, UserDTO.class)
                 .setCountry(user.getCountry().getName())
                 .setCity(user.getCity().getName())
