@@ -1,5 +1,6 @@
 package com.fightnet.controllers;
 
+import com.fightnet.controllers.dto.BookedUser;
 import com.fightnet.controllers.dto.UserDTO;
 import com.fightnet.controllers.search.UserSearchCriteria;
 import com.fightnet.dataAccess.CountryDAO;
@@ -13,6 +14,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,9 +39,12 @@ public class UtilController {
     @GetMapping(value = "findUser")
     public ResponseEntity findUserByEmail(@RequestParam("email") final String email) {
         final AppUser user = userService.findUserByEmail(email);
+        final List<BookedUser> bookedUsers = new ArrayList<>(user.getBookedPeople().size());
+        user.getBookedPeople().forEach(bookedPerson -> bookedUsers.add(mapper.map(bookedPerson, BookedUser.class)));
         return ResponseEntity.ok(mapper.map(user, UserDTO.class)
                 .setCountry(user.getCountry().getName())
-                .setCity(user.getCity().getName()));
+                .setCity(user.getCity().getName())
+                .setBookedUsers(bookedUsers));
     }
 
     @PostMapping(value = "listUsers")

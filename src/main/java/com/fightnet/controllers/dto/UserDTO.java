@@ -1,11 +1,11 @@
 package com.fightnet.controllers.dto;
 
 import lombok.Data;
-import org.bson.types.ObjectId;
+
+import java.util.List;
 
 @Data
 public class UserDTO {
-    private ObjectId id;
     private String name;
     private String surname;
     private String email;
@@ -13,6 +13,7 @@ public class UserDTO {
     private String country;
     private String city;
     private String description;
+    private List<BookedUser> bookedUsers;
 
     public UserDTO setCountry(String country) {
         this.country = country;
@@ -21,6 +22,10 @@ public class UserDTO {
 
     public UserDTO setCity(String city) {
         this.city = city;
+        return this;
+    }
+    public UserDTO setBookedUsers(List<BookedUser> bookedUsers) {
+        this.bookedUsers = bookedUsers;
         return this;
     }
 }
