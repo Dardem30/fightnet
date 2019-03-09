@@ -154,7 +154,7 @@ public class UserService implements UserDetailsService {
 
     public void bookPerson(final String currentUserEmail, final String personEmail) {
         final AppUser user = userRepository.findById(currentUserEmail).get();
-        final List<AppUser> bookedPeople = user.getBookedPeople();
+        final List<AppUser> bookedPeople = user.getBookedPeople() == null ? new ArrayList<>() : user.getBookedPeople();
         bookedPeople.add(new AppUser(personEmail));
         user.setBookedPeople(bookedPeople);
         userRepository.save(user);
