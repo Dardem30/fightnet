@@ -31,7 +31,7 @@ public class Scheduler {
     @Scheduled(fixedDelay = 3600000)
     private void clearDatabase() {
         userRepository.findByRegistered(false).forEach(user -> {
-            if (Calendar.getInstance(TimeZone.getTimeZone(user.getTimezone())).getTime().getTime() - user.getId().getDate().getTime() >= 3600000) {
+            if (Calendar.getInstance(TimeZone.getTimeZone(user.getTimezone())).getTime().getTime() - user.getCreateTime().getTime() >= 3600000) {
                 userRepository.delete(user);
             }
         });

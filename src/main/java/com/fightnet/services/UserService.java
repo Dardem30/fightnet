@@ -93,6 +93,7 @@ public class UserService implements UserDetailsService {
         if (userRepository.findByEmail(user.getEmail()) != null) {
             throw new Exception();
         }
+        user.setCreateTime(new Date());
         user.setRoles(Collections.singleton(roleDAO.findByName("ROLE_USER")));
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user.setRegistered(false);

@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -35,6 +36,7 @@ public class AppUser implements UserDetails{
     private String description;
     @DBRef
     private List<AppUser> bookedPeople;
+    private Date createTime;
 
     public AppUser(String email) {
         this.email = email;
