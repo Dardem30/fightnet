@@ -3,6 +3,7 @@ package com.fightnet.models;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
@@ -34,7 +35,7 @@ public class AppUser implements UserDetails{
     @DBRef
     private City city;
     private String description;
-    @DBRef
+    @Transient
     private List<AppUser> bookedPeople;
     private Date createTime;
 

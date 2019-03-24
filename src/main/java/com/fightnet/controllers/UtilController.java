@@ -14,7 +14,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,17 +38,9 @@ public class UtilController {
     @GetMapping(value = "findUser")
     public ResponseEntity findUserByEmail(@RequestParam("email") final String email) {
         final AppUser user = userService.findUserByEmail(email);
-        final List<BookedUser> bookedUsers;
-        if (user.getBookedPeople() != null) {
-            bookedUsers = new ArrayList<>(user.getBookedPeople().size());
-            user.getBookedPeople().forEach(bookedPerson -> bookedUsers.add(mapper.map(bookedPerson, BookedUser.class)));
-        } else {
-            bookedUsers = new ArrayList<>();
-        }
         return ResponseEntity.ok(mapper.map(user, UserDTO.class)
                 .setCountry(user.getCountry().getName())
-                .setCity(user.getCity().getName())
-                .setBookedUsers(bookedUsers));
+                .setCity(user.getCity().getName()));
     }
 
     @PostMapping(value = "listUsers")
@@ -64,5 +55,9 @@ public class UtilController {
     @GetMapping(value = "bookPerson")
     public void bookPerson(@RequestParam("currentUserEmail") final String currentUserEmail,@RequestParam("personEmail") final String personEmail) {
         userService.bookPerson(currentUserEmail, personEmail);
+    }
+    @GetMapping(value = "getBookedPersons")
+    public ResponseEntity<List<BookedUser>> getBookedPersons(@RequestParam("currentUserEmail") final String currentUserEmail) {
+        return ResponseEntity.ok(userService.getBookedPersons(currentUserEmail));
     }
 }

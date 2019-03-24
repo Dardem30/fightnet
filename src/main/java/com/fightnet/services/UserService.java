@@ -1,16 +1,19 @@
 package com.fightnet.services;
 
 import com.auth0.jwt.JWT;
+import com.fightnet.controllers.dto.BookedUser;
 import com.fightnet.controllers.search.UserSearchCriteria;
 import com.fightnet.dataAccess.RoleDAO;
 import com.fightnet.dataAccess.UserDAO;
 import com.fightnet.dataAccess.VideoDAO;
 import com.fightnet.models.AppUser;
+import com.fightnet.models.BookedPersons;
 import com.fightnet.models.Video;
 import com.fightnet.security.mail.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -41,6 +44,7 @@ public class UserService implements UserDetailsService {
     private final EmailService emailService;
     private final VideoDAO videoRepository;
     private final MongoOperations operations;
+    private final ModelMapper mapper;
 
     @Override
     public final UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -153,10 +157,17 @@ public class UserService implements UserDetailsService {
     }
 
     public void bookPerson(final String currentUserEmail, final String personEmail) {
-        final AppUser user = userRepository.findById(currentUserEmail).get();
-        final List<AppUser> bookedPeople = user.getBookedPeople() == null ? new ArrayList<>() : user.getBookedPeople();
-        bookedPeople.add(new AppUser(personEmail));
-        user.setBookedPeople(bookedPeople);
-        userRepository.save(user);
+        BookedPersons persons = new BookedPersons();
+        persons.setUser1(currentUserEmail);
+        persons.setUser2(personEmail);
+        operations.save(persons);
+    }
+    public List<BookedUser> getBookedPersons(final String currentUserEmail) {
+        final List<BookedPersons> persons = operations.find(Query.query(new Criteria().and("user1").is(currentUserEmail)), BookedPersons.class);
+        final List<BookedUser> result = new ArrayList<>();
+        for (BookedPersons person: persons) {
+            result.add(mapper.map(userRepository.findByEmail(person.getUser2()), BookedUser.class));
+        }
+        return result;
     }
 }

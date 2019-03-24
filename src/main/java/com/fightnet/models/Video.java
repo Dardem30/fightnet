@@ -14,5 +14,5 @@ public class Video {
     private Integer votes1;
     private Integer votes2;
     private boolean approved;
-    private boolean loaded;// on youtube
+    private boolean loaded;// on facebook
 }
