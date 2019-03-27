@@ -1,8 +1,10 @@
 package com.fightnet.controllers;
 
+import com.fightnet.models.Invites;
 import com.fightnet.services.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +24,16 @@ public class UserController {
         } catch (Exception e) {
             log.error("Exception during trying to upload video", e);
             throw new RuntimeException();
+        }
+    }
+    @PostMapping(value = "invite")
+    public ResponseEntity<Invites> invite(@RequestBody final Invites invite) {
+        try {
+            userService.createUpdateInvitation(invite);
+            return ResponseEntity.ok(invite);
+        } catch (Exception e) {
+            log.error("Error during trying to make invitation", e);
+            throw new RuntimeException(e);
         }
     }
 }

@@ -1,6 +1,6 @@
 package com.fightnet.security;
 
-import com.fightnet.dataAccess.UserDAO;
+import com.fightnet.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,7 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class WebSecurity extends WebSecurityConfigurerAdapter {
-    private final UserDAO userRepository;
+    private final UserService userService;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -23,7 +23,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
-                .addFilter(new JWTAuthorizationFilter(authenticationManager(), userRepository))
+                .addFilter(new JWTAuthorizationFilter(authenticationManager(), userService))
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
 }

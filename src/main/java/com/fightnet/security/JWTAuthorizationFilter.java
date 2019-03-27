@@ -3,8 +3,8 @@ package com.fightnet.security;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.fightnet.dataAccess.UserDAO;
 import com.fightnet.models.AppUser;
+import com.fightnet.services.UserService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,11 +19,11 @@ import java.io.IOException;
 import static com.fightnet.security.SecurityConstants.*;
 
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
-    private final UserDAO userRepository;
+    private final UserService userService;
 
-    JWTAuthorizationFilter(final AuthenticationManager authManager, final UserDAO userRepository) {
+    JWTAuthorizationFilter(final AuthenticationManager authManager, final UserService userService) {
         super(authManager);
-        this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     @Override
@@ -55,7 +55,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
             }
             final String email = decodedJWT.getSubject();
             if (email != null) {
-                final AppUser user = userRepository.findByEmail(email);
+                final AppUser user = userService.findUserByEmail(email);
                 return new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword(), user.getRoles());
             }
         }

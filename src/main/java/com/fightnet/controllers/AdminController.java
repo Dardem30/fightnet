@@ -13,6 +13,6 @@ public class AdminController {
     private final UserService userService;
     @GetMapping(value = "{email}")
     public AppUser getUserByUsername(@PathVariable("email") String email) {
-        return userService.getUserByEmail(email);
+        return userService.findUserByEmail(email);
     }
 }
