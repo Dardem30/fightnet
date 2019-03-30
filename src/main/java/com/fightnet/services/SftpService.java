@@ -21,6 +21,7 @@ public class SftpService {
             Session session = jsch.getSession(user, host, port);
             session.setPassword(password);
             session.setConfig("StrictHostKeyChecking", "no");
+            session.setTimeout(99999999);
             session.connect();
             ChannelSftp sftpChannel = (ChannelSftp) session.openChannel("sftp");
             sftpChannel.connect();

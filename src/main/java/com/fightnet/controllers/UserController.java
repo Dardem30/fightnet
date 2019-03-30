@@ -23,9 +23,9 @@ public class UserController {
                                               @RequestParam("fighterEmail1") final String email1,
                                               @RequestParam("fighterEmail2") final String email2,
                                               @RequestParam(value = "inviteId", required = false) final UUID inviteId) {
-        if (inviteId != null) {
-            userService.deleteInvitation(inviteId);
-        }
+//        if (inviteId != null) {
+//            userService.deleteInvitation(inviteId);
+//        }
         userService.saveVideo(file, email1, email2);
         return ResponseEntity.ok("success");
     }
