@@ -22,9 +22,12 @@ public class SftpService {
             session.setPassword(password);
             session.setConfig("StrictHostKeyChecking", "no");
             session.setTimeout(99999999);
+            log.info("Trying to get session");
             session.connect();
+            log.info("Session was created");
             ChannelSftp sftpChannel = (ChannelSftp) session.openChannel("sftp");
             sftpChannel.connect();
+            log.info("Channel was created");
             sftpChannel.put(inputStream, fighter1 + " " + fighter2 + ".mp4", ChannelSftp.OVERWRITE);
             sftpChannel.disconnect();
             session.disconnect();
