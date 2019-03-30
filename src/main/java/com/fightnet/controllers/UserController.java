@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping(value = "user/")
 @RequiredArgsConstructor
@@ -17,15 +19,17 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping(value = "uploadVideo")
-    public String uploadVideo(@RequestParam("file") final MultipartFile file, @RequestParam("fighterEmail1") final String email1, @RequestParam("fighterEmail2") final String email2) {
-        try {
-            userService.saveVideo(file, email1, email2);
-            return "success";
-        } catch (Exception e) {
-            log.error("Exception during trying to upload video", e);
-            throw new RuntimeException();
+    public ResponseEntity<String> uploadVideo(@RequestParam("file") final MultipartFile file,
+                                              @RequestParam("fighterEmail1") final String email1,
+                                              @RequestParam("fighterEmail2") final String email2,
+                                              @RequestParam(value = "inviteId", required = false) final UUID inviteId) {
+        if (inviteId != null) {
+            userService.deleteInvitation(inviteId);
         }
+        userService.saveVideo(file, email1, email2);
+        return ResponseEntity.ok("success");
     }
+
     @PostMapping(value = "invite")
     public ResponseEntity<Invites> invite(@RequestBody final Invites invite) {
         try {

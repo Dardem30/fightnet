@@ -1,13 +1,21 @@
 package com.fightnet.services;
 
 import com.auth0.jwt.JWT;
+import com.fightnet.FightnetApplication;
 import com.fightnet.controllers.dto.BookedUser;
+import com.fightnet.controllers.dto.InvitesDTO;
+import com.fightnet.controllers.dto.VideoDTO;
 import com.fightnet.controllers.search.UserSearchCriteria;
 import com.fightnet.models.*;
 import com.fightnet.security.mail.EmailService;
+import com.restfb.BinaryAttachment;
+import com.restfb.DefaultFacebookClient;
+import com.restfb.FacebookClient;
+import com.restfb.Version;
+import com.restfb.types.FacebookType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.RandomStringUtils;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoOperations;
@@ -23,9 +31,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileOutputStream;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 import static com.fightnet.security.SecurityConstants.EXPIRATION_TIME;
@@ -33,11 +45,14 @@ import static com.fightnet.security.SecurityConstants.SECRET;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService implements UserDetailsService {
+    private final static SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm");
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final EmailService emailService;
     private final MongoOperations operations;
     private final ModelMapper mapper;
+    private final SftpService sftpService;
 
     @Override
     public final UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -100,30 +115,15 @@ public class UserService implements UserDetailsService {
         return operations.findById(email, AppUser.class);
     }
 
-    public void saveVideo(final MultipartFile file, final String email1, String email2) throws Exception {
-        final String[] fileParts = file.getOriginalFilename().split("\\.");
-        final String videoUrl = "videos/" + UUID.randomUUID().toString() + "." + fileParts[fileParts.length - 1];
-        try (final ByteArrayInputStream inputStream = new ByteArrayInputStream(file.getBytes());
-             final FileOutputStream outputStream = new FileOutputStream(videoUrl)) {
-            IOUtils.copy(inputStream, outputStream);
-        }
+    public void saveVideo(final MultipartFile file, final String email1, String email2) {
         final AppUser fighter1 = findUserByEmail(email1);
-        ;
         final AppUser fighter2 = findUserByEmail(email2);
-        ;
-        final Set<Video> fighter1Videos = fighter1.getVideos() == null ? new HashSet<>() : fighter1.getVideos();
-        final Set<Video> fighter2Videos = fighter2.getVideos() == null ? new HashSet<>() : fighter2.getVideos();
-        final Video video = new Video();
-        video.setFighter1(fighter1);
-        video.setFighter2(fighter2);
-        video.setLoaded(false);
-        video.setApproved(false);
-        video.setUrl(videoUrl);
-        operations.save(video);
-        fighter1Videos.add(video);
-        fighter2Videos.add(video);
-        operations.save(fighter1);
-        operations.save(fighter2);
+        try (final InputStream inputStream = file.getInputStream()) {
+            sftpService.sendVideo((FileInputStream) inputStream, fighter1.getName() + " " + fighter1.getSurname() + " (" + fighter1.getEmail() + ")",
+                    fighter2.getName() + " " + fighter2.getSurname() + " (" + fighter2.getEmail() + ")");
+        } catch (Exception e) {
+            log.error("Error during trying to send video on review", e);
+        }
     }
 
     public List<AppUser> list(final UserSearchCriteria searchCriteria) {
@@ -169,12 +169,16 @@ public class UserService implements UserDetailsService {
     }
 
     public void createUpdateInvitation(final Invites invite) {
+        if (invite.getId() == null) {
+            invite.setId(UUID.randomUUID());
+        }
         operations.save(invite);
     }
 
     public List<Country> findAllCountries() {
         return operations.find(new Query().with(new Sort(Sort.Direction.ASC, "name")), Country.class);
     }
+
     public List<Invites> getInvitesForUser(final String email) {
         return operations.find(Query.query(new Criteria().and("fighterInvited.$id").is(email).and("accepted").is(false)), Invites.class);
     }
@@ -184,5 +188,62 @@ public class UserService implements UserDetailsService {
         final Query query = new Query(new Criteria().and("accepted").is(true));
         query.fields().include("latitude").include("longitude");
         return operations.find(query, Invites.class);
+    }
+
+    public void acceptInvite(final Invites invite) {
+        final Notification notification = new Notification();
+        final String text = "User " + invite.getFighterInvited().getName() + " " +
+                invite.getFighterInvited().getSurname() + " accept your invitation on date " +
+                formatter.format(invite.getDate()) + ". Fight style: " + invite.getFightStyle();
+        notification.setEmail(invite.getFighterInviter().getEmail());
+        notification.setText(text);
+        notification.setLatitude(invite.getLatitude());
+        notification.setLongitude(invite.getLongitude());
+        operations.save(notification);
+        createUpdateInvitation(invite);
+    }
+
+    public List<Notification> getNotifications(final String email) {
+        return operations.find(Query.query(new Criteria().and("email").is(email)), Notification.class);
+    }
+
+    public List<InvitesDTO> getPlannedFights(final String email) {
+        final Criteria criteria = new Criteria();
+        criteria.and("accepted").is(true);
+        criteria.orOperator(Criteria.where("fighterInviter.$id").is(email), Criteria.where("fighterInvited.$id").is(email));
+        return operations.find(Query.query(criteria), Invites.class).stream().map(invite -> mapper.map(invite, InvitesDTO.class)).collect(Collectors.toList());
+    }
+
+    public void deleteInvitation(final UUID inviteId) {
+        operations.remove(new Invites(inviteId));
+    }
+
+    private String uploadVideoToFacebook(final MultipartFile file) throws Exception {
+        final FacebookClient client = new DefaultFacebookClient(FightnetApplication.facebookToken, Version.VERSION_2_8);
+
+        final FacebookType response = client.publish("359710211281042/videos", FacebookType.class,
+                BinaryAttachment.with(file.getOriginalFilename(), file.getInputStream()));
+        return response.getId();
+    }
+
+    public void saveVideoToFacebook(final MultipartFile file) throws Exception {
+        final Pattern pattern = Pattern.compile("\\(.*?\\)");
+        final Matcher matcher = pattern.matcher(file.getOriginalFilename());
+        matcher.find();
+        final String email1 = matcher.group().replace("(", "").replace(")", "");
+        matcher.find();
+        final String email2 = matcher.group().replace("(", "").replace(")", "");
+        final Video video = new Video();
+        final String videoId = uploadVideoToFacebook(file);
+        video.setUrl("https://www.facebook.com/100017201528846/videos/" + videoId);
+        video.setLoaded(true);
+        video.setApproved(true);
+        video.setFighter1(operations.findById(email1, AppUser.class));
+        video.setFighter2(operations.findById(email2, AppUser.class));
+        operations.save(video);
+    }
+
+    public List<VideoDTO> getVideos() {
+        return operations.findAll(Video.class).stream().map(video -> mapper.map(video, VideoDTO.class)).collect(Collectors.toList());
     }
 }

@@ -1,8 +1,10 @@
 package com.fightnet.controllers.dto;
 
+import com.fightnet.models.Role;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 public class UserDTO {
@@ -14,6 +16,7 @@ public class UserDTO {
     private String city;
     private String description;
     private List<BookedUser> bookedUsers;
+    private Set<Role> roles;
 
     public UserDTO setCountry(String country) {
         this.country = country;

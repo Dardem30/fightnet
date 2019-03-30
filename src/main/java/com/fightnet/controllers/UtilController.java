@@ -3,10 +3,12 @@ package com.fightnet.controllers;
 import com.fightnet.controllers.dto.BookedUser;
 import com.fightnet.controllers.dto.InvitesDTO;
 import com.fightnet.controllers.dto.UserDTO;
+import com.fightnet.controllers.dto.VideoDTO;
 import com.fightnet.controllers.search.UserSearchCriteria;
 import com.fightnet.models.AppUser;
 import com.fightnet.models.Country;
 import com.fightnet.models.Invites;
+import com.fightnet.models.Notification;
 import com.fightnet.services.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,8 +70,20 @@ public class UtilController {
     public ResponseEntity<List<Invites>> getMarkers() {
         return ResponseEntity.ok(userService.getMarkers());
     }
-    @PostMapping(value = "updateInvite")
+    @PostMapping(value = "acceptInvite")
     public void updateInvite(@RequestBody final Invites invite) {
-        userService.createUpdateInvitation(invite);
+        userService.acceptInvite(invite);
+    }
+    @GetMapping(value = "getNotifications")
+    public List<Notification> getNotifications(@RequestParam("email") final String email) {
+        return userService.getNotifications(email);
+    }
+    @GetMapping(value = "getPlannedFights")
+    public List<InvitesDTO> getPlannedFights(@RequestParam("email") final String email) {
+        return userService.getPlannedFights(email);
+    }
+    @GetMapping(value = "getVideos")
+    public List<VideoDTO> getVideos() {
+        return userService.getVideos();
     }
 }

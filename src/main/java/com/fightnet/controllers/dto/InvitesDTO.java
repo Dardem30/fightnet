@@ -1,15 +1,15 @@
 package com.fightnet.controllers.dto;
 
 import lombok.Data;
-import org.bson.types.ObjectId;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Data
 public class InvitesDTO {
-    private ObjectId id;
-    private UserDTO fighterInviter;
-    private UserDTO fighterInvited;
+    private UUID id;
+    private BookedUser fighterInviter;
+    private BookedUser fighterInvited;
     private float latitude;
     private float longitude;
     private String fightStyle;

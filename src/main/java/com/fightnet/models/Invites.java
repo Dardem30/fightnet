@@ -1,18 +1,20 @@
 package com.fightnet.models;
 
 import lombok.Data;
-import org.bson.types.ObjectId;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Document(collection = "invites")
 @Data
+@NoArgsConstructor
 public class Invites {
     @Id
-    private ObjectId id;
+    private UUID id;
     @DBRef
     private AppUser fighterInviter;
     @DBRef
@@ -22,4 +24,8 @@ public class Invites {
     private String fightStyle;
     private Date date;
     private boolean accepted;
+
+    public Invites(UUID id) {
+        this.id = id;
+    }
 }
