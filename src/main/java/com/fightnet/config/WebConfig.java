@@ -1,4 +1,4 @@
-package com.fightnet.security;
+package com.fightnet.config;
 
 import com.fightnet.interceptor.AccessControlHeaderInterceptor;
 import org.springframework.context.annotation.Configuration;
