@@ -23,7 +23,8 @@ public class MessageService {
 
     public List<Message> getDialog(final String email1, final String email2) {
         final Criteria criteria = new Criteria();
-        criteria.orOperator(Criteria.where("userSender").is(email1), Criteria.where("userSender").is(email2), Criteria.where("userResiver").is(email1), Criteria.where("userResiver").is(email2));
+        criteria.and("userSender").in(email1, email2);
+        criteria.and("userResiver").in(email1, email2);
         return operations.find(Query.query(criteria).with(new Sort(Sort.Direction.ASC, "date")), Message.class);
     }
 }
