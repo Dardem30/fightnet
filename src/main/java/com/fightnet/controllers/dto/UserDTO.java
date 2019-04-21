@@ -4,6 +4,7 @@ import com.fightnet.models.Role;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -17,6 +18,8 @@ public class UserDTO {
     private String description;
     private List<BookedUser> bookedUsers;
     private Set<Role> roles;
+    private Map<String, Integer> wins;
+    private Map<String, Integer> loses;
 
     public UserDTO setCountry(String country) {
         this.country = country;

@@ -2,6 +2,7 @@ package com.fightnet.config;
 
 import com.fightnet.interceptor.AccessControlHeaderInterceptor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
@@ -9,6 +10,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
  * Configuration for interceptors.
  */
 @Configuration
+@EnableScheduling
 public class WebConfig extends WebMvcConfigurationSupport {
 
     @Override

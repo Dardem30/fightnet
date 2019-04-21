@@ -1,5 +1,6 @@
 package com.fightnet.controllers;
 
+import com.fightnet.models.Comment;
 import com.fightnet.models.Message;
 import com.fightnet.services.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +19,17 @@ public class MessageController {
     private MessageService messageService;
 
     @PostMapping("/send")
-    public Message useSimpleRest(@RequestBody final Message message) {
+    public Message send(@RequestBody final Message message) {
         messageService.saveMessage(message);
         this.simpMessagingTemplate.convertAndSend("/socket-publisher/" + message.getUserResiver(), message);
         this.simpMessagingTemplate.convertAndSend("/socket-publisher/" + message.getUserSender(), message);
         return message;
+    }
+    @PostMapping("/sendComment")
+    public Comment sendComment(@RequestBody final Comment comment) {
+        messageService.saveComment(comment);
+        this.simpMessagingTemplate.convertAndSend("/socket-publisher/" + comment.getVideo().getUrl(), comment);
+        return comment;
     }
 
     @GetMapping("/getDialog")

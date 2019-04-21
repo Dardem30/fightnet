@@ -23,6 +23,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .antMatchers("/socket-publisher/**").permitAll()
                 .antMatchers("/socket/**").permitAll()
                 .antMatchers("/message/send").permitAll()
+                .antMatchers("/message/sendComment").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()

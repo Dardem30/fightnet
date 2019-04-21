@@ -5,10 +5,7 @@ import com.fightnet.controllers.dto.InvitesDTO;
 import com.fightnet.controllers.dto.UserDTO;
 import com.fightnet.controllers.dto.VideoDTO;
 import com.fightnet.controllers.search.UserSearchCriteria;
-import com.fightnet.models.AppUser;
-import com.fightnet.models.Country;
-import com.fightnet.models.Invites;
-import com.fightnet.models.Notification;
+import com.fightnet.models.*;
 import com.fightnet.services.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -85,5 +82,10 @@ public class UtilController {
     @GetMapping(value = "getVideos")
     public List<VideoDTO> getVideos() {
         return userService.getVideos();
+    }
+
+    @PostMapping(value = "vote")
+    public void vote(@RequestBody final Video video) {
+        userService.vote(video);
     }
 }

@@ -1,7 +1,6 @@
 package com.fightnet.models;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -9,14 +8,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Document(collection = "users")
 @Data
-@NoArgsConstructor
 public class AppUser implements UserDetails{
     @Id
     private String email;
@@ -38,10 +33,8 @@ public class AppUser implements UserDetails{
     @Transient
     private List<AppUser> bookedPeople;
     private Date createTime;
-
-    public AppUser(String email) {
-        this.email = email;
-    }
+    private Map<String, Integer> wins;
+    private Map<String, Integer> loses;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

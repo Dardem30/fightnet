@@ -22,11 +22,12 @@ public class UserController {
     public ResponseEntity<String> uploadVideo(@RequestParam("file") final MultipartFile file,
                                               @RequestParam("fighterEmail1") final String email1,
                                               @RequestParam("fighterEmail2") final String email2,
+                                              @RequestParam("style") final String style,
                                               @RequestParam(value = "inviteId", required = false) final UUID inviteId) {
-//        if (inviteId != null) {
-//            userService.deleteInvitation(inviteId);
-//        }
-        userService.saveVideo(file, email1, email2);
+        if (inviteId != null) {
+            userService.deleteInvitation(inviteId);
+        }
+        userService.saveVideo(file, email1, email2, style);
         return ResponseEntity.ok("success");
     }
 

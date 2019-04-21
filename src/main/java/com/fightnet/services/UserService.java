@@ -115,12 +115,12 @@ public class UserService implements UserDetailsService {
         return operations.findById(email, AppUser.class);
     }
 
-    public void saveVideo(final MultipartFile file, final String email1, String email2) {
+    public void saveVideo(final MultipartFile file, final String email1, final String email2, final String style) {
         final AppUser fighter1 = findUserByEmail(email1);
         final AppUser fighter2 = findUserByEmail(email2);
         try (final InputStream inputStream = file.getInputStream()) {
             sftpService.sendVideo((FileInputStream) inputStream, fighter1.getName() + " " + fighter1.getSurname() + " (" + fighter1.getEmail() + ")",
-                    fighter2.getName() + " " + fighter2.getSurname() + " (" + fighter2.getEmail() + ")");
+                    fighter2.getName() + " " + fighter2.getSurname() + " (" + fighter2.getEmail() + ") style (" + style + ")");
         } catch (Exception e) {
             log.error("Error during trying to send video on review", e);
         }
@@ -221,29 +221,41 @@ public class UserService implements UserDetailsService {
     private String uploadVideoToFacebook(final MultipartFile file) throws Exception {
         final FacebookClient client = new DefaultFacebookClient(FightnetApplication.facebookToken, Version.VERSION_2_8);
 
-        final FacebookType response = client.publish("359710211281042/videos", FacebookType.class,
+        final FacebookType response = client.publish("me/videos", FacebookType.class,
                 BinaryAttachment.with(file.getOriginalFilename(), file.getInputStream()));
         return response.getId();
     }
 
     public void saveVideoToFacebook(final MultipartFile file) throws Exception {
-        final Pattern pattern = Pattern.compile("\\(.*?\\)");
-        final Matcher matcher = pattern.matcher(file.getOriginalFilename());
-        matcher.find();
-        final String email1 = matcher.group().replace("(", "").replace(")", "");
-        matcher.find();
-        final String email2 = matcher.group().replace("(", "").replace(")", "");
-        final Video video = new Video();
+        log.info("Uploading video to facebook....");
         final String videoId = uploadVideoToFacebook(file);
-        video.setUrl("https://www.facebook.com/100017201528846/videos/" + videoId);
-        video.setLoaded(true);
-        video.setApproved(true);
-        video.setFighter1(operations.findById(email1, AppUser.class));
-        video.setFighter2(operations.findById(email2, AppUser.class));
-        operations.save(video);
+        if (videoId != null) {
+            final Pattern pattern = Pattern.compile("\\(.*?\\)");
+            final Matcher matcher = pattern.matcher(file.getOriginalFilename());
+            matcher.find();
+            final String email1 = matcher.group().replace("(", "").replace(")", "");
+            matcher.find();
+            final String email2 = matcher.group().replace("(", "").replace(")", "");
+            matcher.find();
+            final String style = matcher.group().replace("(", "").replace(")", "");
+            final Video video = new Video();
+            video.setUrl("https://www.facebook.com/2105724756385939/videos/" + videoId);
+            video.setStyle(style);
+            video.setFighter1(operations.findById(email1, AppUser.class));
+            video.setFighter2(operations.findById(email2, AppUser.class));
+            video.setVoteStarts(new Date());
+            operations.save(video);
+            log.info("video was successfully uploaded to facebook");
+        } else {
+            log.error("Error during trying to upload video");
+        }
     }
 
     public List<VideoDTO> getVideos() {
         return operations.findAll(Video.class).stream().map(video -> mapper.map(video, VideoDTO.class)).collect(Collectors.toList());
+    }
+
+    public void vote(final Video video) {
+        operations.save(video);
     }
 }
