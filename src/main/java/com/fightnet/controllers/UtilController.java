@@ -64,7 +64,7 @@ public class UtilController {
         return ResponseEntity.ok(userService.getInvitesForUser(email).stream().map(invite -> mapper.map(invite, InvitesDTO.class)).collect(Collectors.toList()));
     }
     @GetMapping(value = "getMarkers")
-    public ResponseEntity<List<Invites>> getMarkers() {
+    public ResponseEntity<List<InvitesDTO>> getMarkers() {
         return ResponseEntity.ok(userService.getMarkers());
     }
     @PostMapping(value = "acceptInvite")

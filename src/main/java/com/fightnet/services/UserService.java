@@ -184,10 +184,8 @@ public class UserService implements UserDetailsService {
     }
 
 
-    public List<Invites> getMarkers() {
-        final Query query = new Query(new Criteria().and("accepted").is(true));
-        query.fields().include("latitude").include("longitude");
-        return operations.find(query, Invites.class);
+    public List<InvitesDTO> getMarkers() {
+        return operations.find(new Query(new Criteria().and("accepted").is(true)), Invites.class).stream().map(invite -> mapper.map(invite, InvitesDTO.class)).collect(Collectors.toList());
     }
 
     public void acceptInvite(final Invites invite) {
