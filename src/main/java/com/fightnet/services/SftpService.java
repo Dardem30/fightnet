@@ -11,24 +11,25 @@ import java.io.FileInputStream;
 @Service
 @Slf4j
 public class SftpService {
-    public void sendVideo(final FileInputStream inputStream, final String fighter1, final String fighter2) {
-        String user = "roman";
-        String password = "vVzq6F5g(h";
-        String host = "192.168.100.6";
-        int port = 22;
+    private static final String user = "roman";
+    private static final String password = "vVzq6F5g(h";
+    private static final String host = "192.168.100.5";
+    private static final int port = 22;
+
+    public void sendFile(final FileInputStream inputStream, final String fileName) {
         try {
-            JSch jsch = new JSch();
-            Session session = jsch.getSession(user, host, port);
+            final JSch jsch = new JSch();
+            final Session session = jsch.getSession(user, host, port);
             session.setPassword(password);
             session.setConfig("StrictHostKeyChecking", "no");
             session.setTimeout(99999999);
             log.info("Trying to get session");
             session.connect();
             log.info("Session was created");
-            ChannelSftp sftpChannel = (ChannelSftp) session.openChannel("sftp");
+            final ChannelSftp sftpChannel = (ChannelSftp) session.openChannel("sftp");
             sftpChannel.connect();
             log.info("Channel was created");
-            sftpChannel.put(inputStream, fighter1 + " " + fighter2 + ".mp4", ChannelSftp.OVERWRITE);
+            sftpChannel.put(inputStream, fileName, ChannelSftp.APPEND);
             sftpChannel.disconnect();
             session.disconnect();
         } catch (Exception e) {

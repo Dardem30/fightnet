@@ -28,7 +28,7 @@ public class Scheduler {
     public void countVideos() throws ParseException {
         final Date aWeekAgo = new SimpleDateFormat("yyyy-MM-dd").parse(LocalDate.now().minusWeeks(1).toString());
         final List<Video> videos = operations.find(Query.query(new Criteria().and("voteStarts").lt(aWeekAgo)), Video.class);
-        for (final Video video: videos) {
+        for (final Video video : videos) {
             final AppUser user1 = operations.findById(video.getFighter1().getEmail(), AppUser.class);
             final AppUser user2 = operations.findById(video.getFighter2().getEmail(), AppUser.class);
             final int votesForUser1 = video.getVotes1() == null ? 0 : video.getVotes1().size();
@@ -45,7 +45,7 @@ public class Scheduler {
                 operations.save(user1);
                 operations.save(user2);
                 operations.remove(video);
-            } else if (votesForUser1 < votesForUser2){
+            } else if (votesForUser1 < votesForUser2) {
                 final Map<String, Integer> user2WinsMap = user2.getWins() == null ? new HashMap<>() : user2.getWins();
                 final Map<String, Integer> user1LosesMap = user1.getLoses() == null ? new HashMap<>() : user1.getLoses();
                 final int user2Wins = user2WinsMap.get(video.getStyle()) == null ? 0 : user2WinsMap.get(video.getStyle());

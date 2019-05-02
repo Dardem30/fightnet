@@ -12,7 +12,7 @@ import java.util.*;
 
 @Document(collection = "users")
 @Data
-public class AppUser implements UserDetails{
+public class AppUser implements UserDetails {
     @Id
     private String email;
     private boolean registered;
@@ -25,16 +25,16 @@ public class AppUser implements UserDetails{
     private Set<Role> roles;
     @DBRef
     private Set<Video> videos;
-    @DBRef
-    private Country country;
-    @DBRef
-    private City city;
+    private Set<String> photos;
+    private String mainPhoto;
+    private String country;
+    private String city;
     private String description;
-    @Transient
-    private List<AppUser> bookedPeople;
     private Date createTime;
     private Map<String, Integer> wins;
     private Map<String, Integer> loses;
+    @Transient
+    private List<AppUser> bookedPeople;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

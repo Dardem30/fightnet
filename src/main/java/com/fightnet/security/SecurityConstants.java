@@ -5,4 +5,5 @@ public interface SecurityConstants {
     String HEADER = "Authorization";
     String TOKEN_PREFIX = "Bearer ";
     long EXPIRATION_TIME = 86400000; // 1 day
+    int pageSize = 10;
 }

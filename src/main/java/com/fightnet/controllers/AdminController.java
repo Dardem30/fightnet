@@ -31,4 +31,14 @@ public class AdminController {
             throw new RuntimeException(e);
         }
     }
+    @PostMapping(value = "uploadPhotoToFacebook")
+    public ResponseEntity<String> uploadPhoto(@RequestParam("file") final MultipartFile file) {
+        try {
+            userService.savePhotoToFacebook(file);
+            return ResponseEntity.ok("success");
+        } catch (Exception e) {
+            log.error("Error during trying to upload photo to facebook");
+            throw new RuntimeException(e);
+        }
+    }
 }

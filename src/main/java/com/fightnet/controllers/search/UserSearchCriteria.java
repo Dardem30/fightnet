@@ -11,4 +11,5 @@ public class UserSearchCriteria {
     private ObjectId country;
     private ObjectId city;
     private String searcherEmail;
+    private int pageNum;
 }

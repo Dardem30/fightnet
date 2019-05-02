@@ -5,6 +5,7 @@ import com.fightnet.FightnetApplication;
 import com.fightnet.controllers.dto.BookedUser;
 import com.fightnet.controllers.dto.InvitesDTO;
 import com.fightnet.controllers.dto.VideoDTO;
+import com.fightnet.controllers.search.SearchResponse;
 import com.fightnet.controllers.search.UserSearchCriteria;
 import com.fightnet.models.*;
 import com.fightnet.security.mail.EmailService;
@@ -40,8 +41,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
-import static com.fightnet.security.SecurityConstants.EXPIRATION_TIME;
-import static com.fightnet.security.SecurityConstants.SECRET;
+import static com.fightnet.security.SecurityConstants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -115,19 +115,26 @@ public class UserService implements UserDetailsService {
         return operations.findById(email, AppUser.class);
     }
 
-    public void saveVideo(final MultipartFile file, final String email1, final String email2, final String style) {
+    public void saveVideo(final MultipartFile file, final String email1, final String email2, final String style) throws Exception {
         final AppUser fighter1 = findUserByEmail(email1);
         final AppUser fighter2 = findUserByEmail(email2);
+        final String[] extension = file.getOriginalFilename().split("\\.");
         try (final InputStream inputStream = file.getInputStream()) {
-            sftpService.sendVideo((FileInputStream) inputStream, fighter1.getName() + " " + fighter1.getSurname() + " (" + fighter1.getEmail() + ")",
-                    fighter2.getName() + " " + fighter2.getSurname() + " (" + fighter2.getEmail() + ") style (" + style + ")");
-        } catch (Exception e) {
-            log.error("Error during trying to send video on review", e);
+            sftpService.sendFile((FileInputStream) inputStream, fighter1.getName() + " " + fighter1.getSurname() + " (" + fighter1.getEmail() + ")" + " " +
+                    fighter2.getName() + " " + fighter2.getSurname() + " (" + fighter2.getEmail() + ") style (" + style + ")" + "." + extension[extension.length - 1]);
         }
     }
 
-    public List<AppUser> list(final UserSearchCriteria searchCriteria) {
+    public void savePhoto(final MultipartFile file, final String email) throws Exception {
+        final String[] extension = file.getOriginalFilename().split("\\.");
+        try (final InputStream inputStream = file.getInputStream()) {
+            sftpService.sendFile((FileInputStream) inputStream, "(" + email + ")" + " " + RandomStringUtils.randomAlphanumeric(4) + "." + extension[extension.length - 1]);
+        }
+    }
+
+    public SearchResponse<AppUser> list(final UserSearchCriteria searchCriteria) {
         final Criteria criteria = new Criteria();
+        final SearchResponse<AppUser> response = new SearchResponse<>();
         criteria.and("registered").is(true);
         criteria.and("email").ne(searchCriteria.getSearcherEmail());
         if (searchCriteria.getName() != null) {
@@ -145,7 +152,11 @@ public class UserService implements UserDetailsService {
         if (searchCriteria.getCity() != null) {
             criteria.and("city.id").is(searchCriteria.getCity());
         }
-        return operations.find(Query.query(criteria).limit(10), AppUser.class);
+        final Query query = new Query(criteria);
+        query.fields().include("email").include("name").include("surname").include("city").include("country").include("description");
+        response.setCount(operations.count(Query.query(criteria), AppUser.class));
+        response.setRecords(operations.find(Query.query(criteria).skip(pageSize * (searchCriteria.getPageNum() - 1)).limit(pageSize), AppUser.class));
+        return response;
     }
 
     public void bookPerson(final String currentUserEmail, final String personEmail) {
@@ -216,17 +227,17 @@ public class UserService implements UserDetailsService {
         operations.remove(new Invites(inviteId));
     }
 
-    private String uploadVideoToFacebook(final MultipartFile file) throws Exception {
+    private String uploadToFacebook(final MultipartFile file, final String uploadPath) throws Exception {
         final FacebookClient client = new DefaultFacebookClient(FightnetApplication.facebookToken, Version.VERSION_2_8);
 
-        final FacebookType response = client.publish("me/videos", FacebookType.class,
+        final FacebookType response = client.publish(uploadPath, FacebookType.class,
                 BinaryAttachment.with(file.getOriginalFilename(), file.getInputStream()));
         return response.getId();
     }
 
     public void saveVideoToFacebook(final MultipartFile file) throws Exception {
         log.info("Uploading video to facebook....");
-        final String videoId = uploadVideoToFacebook(file);
+        final String videoId = uploadToFacebook(file, "me/videos");
         if (videoId != null) {
             final Pattern pattern = Pattern.compile("\\(.*?\\)");
             final Matcher matcher = pattern.matcher(file.getOriginalFilename());
@@ -246,6 +257,28 @@ public class UserService implements UserDetailsService {
             log.info("video was successfully uploaded to facebook");
         } else {
             log.error("Error during trying to upload video");
+        }
+    }
+
+    public void savePhotoToFacebook(final MultipartFile file) throws Exception {
+        log.info("Uploading photo to facebook....");
+        final String photoId = uploadToFacebook(file, "me/photos");
+        if (photoId != null) {
+            final String photoUrl = "https://www.facebook.com/2105724756385939/photos/" + photoId;
+            final Pattern pattern = Pattern.compile("\\(.*?\\)");
+            final Matcher matcher = pattern.matcher(file.getOriginalFilename());
+            matcher.find();
+            final AppUser user = operations.findById(matcher.group().replace("(", "").replace(")", ""), AppUser.class);
+            final Set<String> photos = user.getPhotos() == null ? new HashSet<>() : user.getPhotos();
+            if (user.getMainPhoto() == null) {
+                user.setMainPhoto(photoUrl);
+            }
+            user.setPhotos(photos);
+            photos.add(photoUrl);
+            operations.save(user);
+            log.info("Successfully uploaded photo to facebook");
+        } else {
+            log.error("Error during trying to upload photo");
         }
     }
 
