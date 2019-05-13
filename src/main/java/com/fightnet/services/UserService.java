@@ -7,6 +7,7 @@ import com.fightnet.controllers.dto.InvitesDTO;
 import com.fightnet.controllers.dto.VideoDTO;
 import com.fightnet.controllers.search.SearchResponse;
 import com.fightnet.controllers.search.UserSearchCriteria;
+import com.fightnet.controllers.search.VideoSearchCriteria;
 import com.fightnet.models.*;
 import com.fightnet.security.mail.EmailService;
 import com.restfb.BinaryAttachment;
@@ -154,8 +155,8 @@ public class UserService implements UserDetailsService {
         }
         final Query query = new Query(criteria);
         query.fields().include("email").include("name").include("surname").include("city").include("country").include("description");
-        response.setCount(operations.count(Query.query(criteria), AppUser.class));
-        response.setRecords(operations.find(Query.query(criteria).skip(pageSize * (searchCriteria.getPageNum() - 1)).limit(pageSize), AppUser.class));
+        response.setCount(operations.count(query, AppUser.class));
+        response.setRecords(operations.find(query.skip(pageSize * (searchCriteria.getPageNum() - 1)).limit(pageSize), AppUser.class));
         return response;
     }
 
@@ -187,7 +188,9 @@ public class UserService implements UserDetailsService {
     }
 
     public List<Country> findAllCountries() {
-        return operations.find(new Query().with(new Sort(Sort.Direction.ASC, "name")), Country.class);
+        return operations.find(new Query().with(new Sort(Sort.Direction.ASC, "name")), Country.class).stream()
+                .peek(country -> country.setCities(country.getCities().stream().sorted(Comparator.comparing(City::getName)).collect(Collectors.toList())))
+                .collect(Collectors.toList());
     }
 
     public List<Invites> getInvitesForUser(final String email) {
@@ -282,8 +285,23 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public List<VideoDTO> getVideos() {
-        return operations.findAll(Video.class).stream().map(video -> mapper.map(video, VideoDTO.class)).collect(Collectors.toList());
+    public SearchResponse<VideoDTO> getVideos(final VideoSearchCriteria searchCriteria) {
+        final Criteria criteria = new Criteria();
+        final SearchResponse<VideoDTO> response = new SearchResponse<>();
+        if (searchCriteria.getStyle() != null) {
+            criteria.and("style").is(searchCriteria.getStyle());
+        }
+        if (searchCriteria.getName() != null) {
+            criteria.orOperator(Criteria.where("fighter1.name").regex(searchCriteria.getName(), "i"),
+                    Criteria.where("fighter2.name").regex(searchCriteria.getName(), "i"),
+                    Criteria.where("fighter1.surname").regex(searchCriteria.getName(), "i"),
+                    Criteria.where("fighter2.surname").regex(searchCriteria.getName(), "i"));
+        }
+        final Query query = new Query(criteria);
+        response.setCount(operations.count(query, Video.class));
+        response.setRecords(operations.find(query.skip(pageSize * (searchCriteria.getPageNum() - 1)).limit(pageSize), Video.class)
+                .stream().map(video -> mapper.map(video, VideoDTO.class)).collect(Collectors.toList()));
+        return response;
     }
 
     public void vote(final Video video) {

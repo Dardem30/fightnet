@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Document(collection = "videos")
@@ -20,7 +21,7 @@ public class Video {
     @DBRef
     private Set<AppUser> votes2;
     @DBRef
-    private Set<Comment> comments;
+    private List<Comment> comments;
     private Date voteStarts;
     private String style;
 }

@@ -36,4 +36,8 @@ public class MessageController {
     public List<Message> getDialog(@RequestParam("email1") final String email1, @RequestParam("email2") final String email2) {
         return messageService.getDialog(email1, email2);
     }
+    @GetMapping("/getConversations")
+    public List<Message> getConversations(@RequestParam("email") final String email) {
+        return messageService.getConversations(email);
+    }
 }

@@ -13,7 +13,7 @@ import java.util.Properties;
 
 @SpringBootApplication
 public class FightnetApplication {
-    public static String facebookToken = "EAAFdvUOtnA8BALNPx4bM6Trnhr3B3ZCayqeTDfFWn7TF9OSh6aUVdzc56BFMjdpplAvZBqZBDFvWzJQoeIm8faZBZC2bHE00KiCiSV8DNgJKh69KvfFmtNBlNm7N16ZA6Kr8HX14urMLflWfu41ZCIueHb7xJZBPgTL1AIRli7CTBVFZB72flRRNzq8YNCtDIaB1NeQyIP6ZCw1wZDZD";
+    public static String facebookToken = "EAAFdvUOtnA8BANvQfgCgofwupLq3uZBULapi6sv0kovAITLHhuCeO0Q6R3KfHeMWcKmgLZAoCneoqSfzfUUAlbNL7zmUbdohASLxRNBI0iCeInYCXRhYZCAug6HY8aTv0ZCMHeCey83mk2LPZCtKw5nKE6OZAysCGJUF6qfhNJbTTq6LSgj57x7IocZBZAgi5H3hdeOgKkZCNbwZDZD";
     @Value("${spring.mail.username}")
     private String mailName;
     @Value("${spring.mail.password}")

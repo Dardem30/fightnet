@@ -1,5 +1,6 @@
 package com.fightnet.services;
 
+import com.fightnet.models.AppUser;
 import com.fightnet.models.Comment;
 import com.fightnet.models.Message;
 import com.fightnet.models.Video;
@@ -10,10 +11,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,11 +33,30 @@ public class MessageService {
 
     public void saveComment(final Comment comment) {
         final Video video = operations.findById(comment.getVideo().getUrl(), Video.class);
-        final Set<Comment> comments = video.getComments() == null ? new HashSet<>() : video.getComments();
+        final List<Comment> comments = video.getComments() == null ? new ArrayList<>() : video.getComments();
         comment.setDate(new Date());
         comments.add(comment);
         video.setComments(comments);
         operations.save(comment);
         operations.save(video);
+    }
+
+    public List<Message> getConversations(final String email) {
+        final Map<String, Message> latestMassagesMap = new HashMap<>();
+        for (final Message message: operations.find(Query.query(new Criteria().orOperator(Criteria.where("userSender").is(email), Criteria.where("userResiver").is(email))), Message.class)) {
+            final String user = message.getUserResiver().equals(email) ? message.getUserSender() : message.getUserResiver();
+            final Message lastMessage = latestMassagesMap.get(user);
+            if (lastMessage == null) {
+                latestMassagesMap.put(user, message);
+            } else if (lastMessage.getDate().compareTo(message.getDate()) < 0){
+                latestMassagesMap.put(user, message);
+            }
+        }
+        return latestMassagesMap.entrySet().stream()
+                .map(entry -> {
+                    final AppUser user = operations.findById(entry.getKey(), AppUser.class);
+                    return entry.getValue().setTitleName(user.getName() + " " + user.getSurname());
+                })
+                .collect(Collectors.toList());
     }
 }

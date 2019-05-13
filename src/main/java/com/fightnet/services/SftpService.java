@@ -12,8 +12,8 @@ import java.io.FileInputStream;
 @Slf4j
 public class SftpService {
     private static final String user = "roman";
-    private static final String password = "vVzq6F5g(h";
-    private static final String host = "192.168.100.5";
+    private static final String password = "2";
+    private static final String host = "192.168.0.106";
     private static final int port = 22;
 
     public void sendFile(final FileInputStream inputStream, final String fileName) {

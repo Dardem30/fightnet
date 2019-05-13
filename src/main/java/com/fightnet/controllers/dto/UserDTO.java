@@ -20,6 +20,8 @@ public class UserDTO {
     private Set<Role> roles;
     private Map<String, Integer> wins;
     private Map<String, Integer> loses;
+    private Set<String> photos;
+    private String mainPhoto;
 
     public UserDTO setCountry(String country) {
         this.country = country;
@@ -30,6 +32,7 @@ public class UserDTO {
         this.city = city;
         return this;
     }
+
     public UserDTO setBookedUsers(List<BookedUser> bookedUsers) {
         this.bookedUsers = bookedUsers;
         return this;

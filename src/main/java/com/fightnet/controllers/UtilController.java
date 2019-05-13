@@ -6,6 +6,7 @@ import com.fightnet.controllers.dto.UserDTO;
 import com.fightnet.controllers.dto.VideoDTO;
 import com.fightnet.controllers.search.SearchResponse;
 import com.fightnet.controllers.search.UserSearchCriteria;
+import com.fightnet.controllers.search.VideoSearchCriteria;
 import com.fightnet.models.*;
 import com.fightnet.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -82,9 +83,9 @@ public class UtilController {
         return userService.getPlannedFights(email);
     }
 
-    @GetMapping(value = "getVideos")
-    public List<VideoDTO> getVideos() {
-        return userService.getVideos();
+    @PostMapping(value = "getVideos")
+    public SearchResponse<VideoDTO> getVideos(@RequestBody() final VideoSearchCriteria searchCriteria) {
+        return userService.getVideos(searchCriteria);
     }
 
     @PostMapping(value = "vote")
