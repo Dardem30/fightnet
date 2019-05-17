@@ -180,11 +180,27 @@ public class UserService implements UserDetailsService {
         return result;
     }
 
-    public void createUpdateInvitation(final Invites invite) {
+    private void createUpdateInvitation(final Invites invite) {
         if (invite.getId() == null) {
             invite.setId(UUID.randomUUID());
         }
         operations.save(invite);
+    }
+
+    public void invite(final Invites invite) {
+        final AppUser user = findUserByEmail(invite.getFighterInvited().getEmail());
+        user.setNotifications(user.getNotifications() == null ? 1 : user.getNotifications() + 1);
+        operations.save(user);
+        final Notification notification = new Notification();
+        notification.setEmail(user.getEmail());
+        notification.setText(invite.getFighterInvited().getName() + " " +
+                invite.getFighterInvited().getSurname() + " invite you on date " +
+                formatter.format(invite.getDate()) + ". Fight style: " + invite.getFightStyle());
+        notification.setLongitude(invite.getLongitude());
+        notification.setLatitude(invite.getLatitude());
+        notification.setReaded(false);
+        operations.save(notification);
+        createUpdateInvitation(invite);
     }
 
     public List<Country> findAllCountries() {
@@ -193,8 +209,12 @@ public class UserService implements UserDetailsService {
                 .collect(Collectors.toList());
     }
 
-    public List<Invites> getInvitesForUser(final String email) {
-        return operations.find(Query.query(new Criteria().and("fighterInvited.$id").is(email).and("accepted").is(false)), Invites.class);
+    public SearchResponse<InvitesDTO> getInvitesForUser(final String email, final int page) {
+        final SearchResponse<InvitesDTO> response = new SearchResponse<>();
+        final Query query = Query.query(new Criteria().and("fighterInvited.$id").is(email).and("accepted").is(false));
+        response.setCount(operations.count(query, Invites.class));
+        response.setRecords(operations.find(query.skip(pageSize * (page - 1)).limit(pageSize), Invites.class).stream().map(invite -> mapper.map(invite, InvitesDTO.class)).collect(Collectors.toList()));
+        return response;
     }
 
 
@@ -204,13 +224,13 @@ public class UserService implements UserDetailsService {
 
     public void acceptInvite(final Invites invite) {
         final Notification notification = new Notification();
-        final String text = "User " + invite.getFighterInvited().getName() + " " +
-                invite.getFighterInvited().getSurname() + " accept your invitation on date " +
-                formatter.format(invite.getDate()) + ". Fight style: " + invite.getFightStyle();
         notification.setEmail(invite.getFighterInviter().getEmail());
-        notification.setText(text);
-        notification.setLatitude(invite.getLatitude());
+        notification.setText(invite.getFighterInvited().getName() + " " +
+                invite.getFighterInvited().getSurname() + " accept your invitation on date " +
+                formatter.format(invite.getDate()) + ". Fight style: " + invite.getFightStyle());
         notification.setLongitude(invite.getLongitude());
+        notification.setLatitude(invite.getLatitude());
+        notification.setReaded(false);
         operations.save(notification);
         createUpdateInvitation(invite);
     }
@@ -306,5 +326,21 @@ public class UserService implements UserDetailsService {
 
     public void vote(final Video video) {
         operations.save(video);
+    }
+
+    public void resetNotifications(final String email) {
+        final AppUser user = findUserByEmail(email);
+        user.setNotifications(0);
+        for (final Notification notification: operations.find(Query.query(new Criteria().and("email").is(email).and("readed").is(false)), Notification.class)) {
+            notification.setReaded(true);
+            operations.save(notification);
+        }
+        operations.save(user);
+    }
+
+    public void resetMessages(final String email) {
+        final AppUser user = findUserByEmail(email);
+        user.setUnreadedMessages(0);
+        operations.save(user);
     }
 }

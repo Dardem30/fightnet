@@ -22,6 +22,9 @@ public class MessageService {
     public void saveMessage(final Message message) {
         message.setDate(new Date());
         operations.save(message);
+        final AppUser user = operations.findById(message.getUserResiver(), AppUser.class);
+        user.setUnreadedMessages(user.getUnreadedMessages() == null ? 1 : user.getUnreadedMessages() + 1);
+        operations.save(user);
     }
 
     public List<Message> getDialog(final String email1, final String email2) {

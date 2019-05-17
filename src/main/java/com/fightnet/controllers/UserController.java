@@ -5,6 +5,7 @@ import com.fightnet.services.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,6 +18,7 @@ import java.util.UUID;
 @Slf4j
 public class UserController {
     private final UserService userService;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     @PostMapping(value = "uploadVideo")
     public ResponseEntity<String> uploadVideo(@RequestParam("file") final MultipartFile file,
@@ -50,7 +52,8 @@ public class UserController {
     @PostMapping(value = "invite")
     public ResponseEntity<Invites> invite(@RequestBody final Invites invite) {
         try {
-            userService.createUpdateInvitation(invite);
+            userService.invite(invite);
+            simpMessagingTemplate.convertAndSend("/socket-publisher/invite/" + invite.getFighterInvited().getEmail(), true);
             return ResponseEntity.ok(invite);
         } catch (Exception e) {
             log.error("Error during trying to make invitation", e);

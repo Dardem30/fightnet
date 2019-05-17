@@ -13,10 +13,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "util/")
@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 public class UtilController {
     private final UserService userService;
     private final ModelMapper mapper;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     @GetMapping(value = "getCountries")
     public List<Country> getCountries() {
@@ -59,8 +60,8 @@ public class UtilController {
     }
 
     @GetMapping(value = "getInvitesForUser")
-    public ResponseEntity<List<InvitesDTO>> getInvitesForUser(@RequestParam("email") final String email) {
-        return ResponseEntity.ok(userService.getInvitesForUser(email).stream().map(invite -> mapper.map(invite, InvitesDTO.class)).collect(Collectors.toList()));
+    public ResponseEntity<SearchResponse<InvitesDTO>> getInvitesForUser(@RequestParam("email") final String email, @RequestParam("page") final Integer page) {
+        return ResponseEntity.ok(userService.getInvitesForUser(email, page));
     }
 
     @GetMapping(value = "getMarkers")
@@ -71,6 +72,7 @@ public class UtilController {
     @PostMapping(value = "acceptInvite")
     public void updateInvite(@RequestBody final Invites invite) {
         userService.acceptInvite(invite);
+        simpMessagingTemplate.convertAndSend("/socket-publisher/invite/" + invite.getFighterInviter().getEmail(), true);
     }
 
     @GetMapping(value = "getNotifications")
@@ -91,5 +93,14 @@ public class UtilController {
     @PostMapping(value = "vote")
     public void vote(@RequestBody final Video video) {
         userService.vote(video);
+    }
+
+    @GetMapping(value = "resetNotifications")
+    public void resetNotifications(@RequestParam("email") final String email) {
+        userService.resetNotifications(email);
+    }
+    @GetMapping(value = "resetMessages")
+    public void resetMessages(@RequestParam("email") final String email) {
+        userService.resetMessages(email);
     }
 }

@@ -1,6 +1,7 @@
 package com.fightnet.services.scheduler;
 
 import com.fightnet.models.AppUser;
+import com.fightnet.models.Notification;
 import com.fightnet.models.Video;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,5 +62,17 @@ public class Scheduler {
 
         }
         log.info("Scheduler successfully finished counting wins/loses");
+    }
+    @Scheduled(cron = "0 23 */2 * * ?")
+    public void removeNotifications() throws ParseException {
+        operations.findAndRemove(Query.query(new Criteria().and("readed").is(true)
+                .and("createTime").lt(new SimpleDateFormat("yyyy-MM-dd").parse(LocalDate.now().minusDays(1).toString()))), Notification.class);
+        log.info("Scheduler successfully remove all old notifications");
+    }
+    @Scheduled(cron = "0 23 */2 * * ?")
+    public void removeUnregisteredUsers() throws ParseException {
+        operations.findAndRemove(Query.query(new Criteria().and("registered").is(false)
+                .and("createTime").lt(new SimpleDateFormat("yyyy-MM-dd").parse(LocalDate.now().minusDays(1).toString()))), AppUser.class);
+        log.info("Scheduler successfully remove unregistered users");
     }
 }

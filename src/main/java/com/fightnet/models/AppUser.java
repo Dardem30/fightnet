@@ -20,7 +20,6 @@ public class AppUser implements UserDetails {
     private String name;
     private String surname;
     private String code;
-    private String timezone;
     @DBRef
     private Set<Role> roles;
     @DBRef
@@ -33,6 +32,8 @@ public class AppUser implements UserDetails {
     private Date createTime;
     private Map<String, Integer> wins;
     private Map<String, Integer> loses;
+    private Integer notifications;
+    private Integer unreadedMessages;
     @Transient
     private List<AppUser> bookedPeople;
 

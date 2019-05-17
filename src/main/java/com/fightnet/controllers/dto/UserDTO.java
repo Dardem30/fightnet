@@ -22,6 +22,8 @@ public class UserDTO {
     private Map<String, Integer> loses;
     private Set<String> photos;
     private String mainPhoto;
+    private Integer notifications;
+    private Integer unreadedMessages;
 
     public UserDTO setCountry(String country) {
         this.country = country;
