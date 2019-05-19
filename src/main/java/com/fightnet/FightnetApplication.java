@@ -13,7 +13,7 @@ import java.util.Properties;
 
 @SpringBootApplication
 public class FightnetApplication {
-    public static String facebookToken = "EAAFdvUOtnA8BANvQfgCgofwupLq3uZBULapi6sv0kovAITLHhuCeO0Q6R3KfHeMWcKmgLZAoCneoqSfzfUUAlbNL7zmUbdohASLxRNBI0iCeInYCXRhYZCAug6HY8aTv0ZCMHeCey83mk2LPZCtKw5nKE6OZAysCGJUF6qfhNJbTTq6LSgj57x7IocZBZAgi5H3hdeOgKkZCNbwZDZD";
+    public static String facebookToken = "EAAFdvUOtnA8BAJEU1ZCjTRhtB9CAzYQFa3GO8AwQidpSUZCAGZAOTe2zJIyeCuEK3uZCMIpXLi55NqtvpkZCOi6DZBvu5mptZAuyQ4PhT9hbievaX2XayoPXgIMeqWItATm09WKLDnZCUywGyEQaJN4TwpXHfie09W4F4AUtIG1M92Ho67UZAR4p7swItsrYan3Xj5gzhJ89gUwZDZD";
     @Value("${spring.mail.username}")
     private String mailName;
     @Value("${spring.mail.password}")
@@ -40,6 +40,10 @@ public class FightnetApplication {
         props.put("mail.smtp.starttls.enable", "true");
         mailSender.setJavaMailProperties(props);
 
+        System.out.println(mailSender);
+        System.out.println(props);
+        System.out.println(mailName);
+        System.out.println(mailPassword);
         return mailSender;
     }
 
