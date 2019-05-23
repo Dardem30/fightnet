@@ -1,5 +1,6 @@
 package com.fightnet.controllers;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fightnet.models.Comment;
 import com.fightnet.models.Message;
 import com.fightnet.services.MessageService;
@@ -32,12 +33,12 @@ public class MessageController {
         return comment;
     }
 
-    @GetMapping("/getDialog")
-    public List<Message> getDialog(@RequestParam("email1") final String email1, @RequestParam("email2") final String email2) {
-        return messageService.getDialog(email1, email2);
+    @PostMapping("/getDialog")
+    public List<Message> getDialog(@RequestBody final JsonNode request) {
+        return messageService.getDialog(request.get("email1").asText(), request.get("email2").asText());
     }
-    @GetMapping("/getConversations")
-    public List<Message> getConversations(@RequestParam("email") final String email) {
-        return messageService.getConversations(email);
+    @PostMapping("/getConversations")
+    public List<Message> getConversations(@RequestBody final JsonNode email) {
+        return messageService.getConversations(email.get("email").asText());
     }
 }

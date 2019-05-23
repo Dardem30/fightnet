@@ -1,5 +1,6 @@
 package com.fightnet.controllers;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fightnet.controllers.dto.BookedUser;
 import com.fightnet.controllers.dto.InvitesDTO;
 import com.fightnet.controllers.dto.UserDTO;
@@ -33,10 +34,9 @@ public class UtilController {
         return userService.findAllCountries();
     }
 
-    @GetMapping(value = "findUser")
-    public ResponseEntity findUserByEmail(@RequestParam("email") final String email) {
-        final AppUser user = userService.findUserByEmail(email);
-        return ResponseEntity.ok(mapper.map(user, UserDTO.class));
+    @PostMapping(value = "findUser")
+    public ResponseEntity findUserByEmail(@RequestBody final JsonNode email) {
+        return ResponseEntity.ok(mapper.map(userService.findUserByEmail(email.get("email").asText()), UserDTO.class));
     }
 
     @PostMapping(value = "listUsers")
@@ -44,24 +44,24 @@ public class UtilController {
         return ResponseEntity.ok(userService.list(searchCriteria));
     }
 
-    @GetMapping(value = "bookPerson")
-    public void bookPerson(@RequestParam("currentUserEmail") final String currentUserEmail, @RequestParam("personEmail") final String personEmail) {
-        userService.bookPerson(currentUserEmail, personEmail);
+    @PostMapping(value = "bookPerson")
+    public void bookPerson(@RequestBody final JsonNode request) {
+        userService.bookPerson(request.get("currentUserEmail").asText(), request.get("personEmail").asText());
     }
 
-    @GetMapping(value = "unBookPerson")
-    public void unBookPerson(@RequestParam("currentUserEmail") final String currentUserEmail, @RequestParam("personEmail") final String personEmail) {
-        userService.unBookPerson(currentUserEmail, personEmail);
+    @PostMapping(value = "unBookPerson")
+    public void unBookPerson(@RequestBody final JsonNode request) {
+        userService.unBookPerson(request.get("currentUserEmail").asText(), request.get("email").asText());
     }
 
-    @GetMapping(value = "getBookedPersons")
-    public ResponseEntity<List<BookedUser>> getBookedPersons(@RequestParam("currentUserEmail") final String currentUserEmail) {
-        return ResponseEntity.ok(userService.getBookedPersons(currentUserEmail));
+    @PostMapping(value = "getBookedPersons")
+    public ResponseEntity<List<BookedUser>> getBookedPersons(@RequestBody final JsonNode currentUserEmail) {
+        return ResponseEntity.ok(userService.getBookedPersons(currentUserEmail.get("currentUserEmail").asText()));
     }
 
-    @GetMapping(value = "getInvitesForUser")
-    public ResponseEntity<SearchResponse<InvitesDTO>> getInvitesForUser(@RequestParam("email") final String email, @RequestParam("page") final Integer page) {
-        return ResponseEntity.ok(userService.getInvitesForUser(email, page));
+    @PostMapping(value = "getInvitesForUser")
+    public ResponseEntity<SearchResponse<InvitesDTO>> getInvitesForUser(@RequestBody final JsonNode request) {
+        return ResponseEntity.ok(userService.getInvitesForUser(request.get("email").asText(), request.get("page").asInt()));
     }
 
     @GetMapping(value = "getMarkers")
@@ -75,14 +75,14 @@ public class UtilController {
         simpMessagingTemplate.convertAndSend("/socket-publisher/invite/" + invite.getFighterInviter().getEmail(), true);
     }
 
-    @GetMapping(value = "getNotifications")
-    public List<Notification> getNotifications(@RequestParam("email") final String email) {
-        return userService.getNotifications(email);
+    @PostMapping(value = "getNotifications")
+    public List<Notification> getNotifications(@RequestBody final JsonNode email) {
+        return userService.getNotifications(email.get("email").asText());
     }
 
-    @GetMapping(value = "getPlannedFights")
-    public List<InvitesDTO> getPlannedFights(@RequestParam("email") final String email) {
-        return userService.getPlannedFights(email);
+    @PostMapping(value = "getPlannedFights")
+    public List<InvitesDTO> getPlannedFights(@RequestBody final JsonNode email) {
+        return userService.getPlannedFights(email.get("email").asText());
     }
 
     @PostMapping(value = "getVideos")
@@ -95,12 +95,12 @@ public class UtilController {
         userService.vote(video);
     }
 
-    @GetMapping(value = "resetNotifications")
-    public void resetNotifications(@RequestParam("email") final String email) {
-        userService.resetNotifications(email);
+    @PostMapping(value = "resetNotifications")
+    public void resetNotifications(@RequestBody final JsonNode email) {
+        userService.resetNotifications(email.get("email").asText());
     }
-    @GetMapping(value = "resetMessages")
-    public void resetMessages(@RequestParam("email") final String email) {
-        userService.resetMessages(email);
+    @PostMapping(value = "resetMessages")
+    public void resetMessages(@RequestBody final JsonNode email) {
+        userService.resetMessages(email.get("email").asText());
     }
 }

@@ -1,6 +1,7 @@
 package com.fightnet.security;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fightnet.models.AppUser;
 import com.fightnet.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -31,9 +32,9 @@ public class SecurityController {
     }
 
     @PostMapping("/sign-up")
-    public String signUp(@RequestParam("email") final String email, @RequestParam("code") final String code) {
+    public String signUp(@RequestBody final JsonNode requestBody) {
         try {
-            return userService.saveUser(email, code);
+            return userService.saveUser(requestBody.get("email").asText(), requestBody.get("code").asText());
         } catch (Exception e) {
             log.info("Wrong code", e);
             return "false";

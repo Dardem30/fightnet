@@ -1,5 +1,6 @@
 package com.fightnet.controllers;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fightnet.models.Invites;
 import com.fightnet.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -21,17 +22,13 @@ public class UserController {
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     @PostMapping(value = "uploadVideo")
-    public ResponseEntity<String> uploadVideo(@RequestParam("file") final MultipartFile file,
-                                              @RequestParam("fighterEmail1") final String email1,
-                                              @RequestParam("fighterEmail2") final String email2,
-                                              @RequestParam("style") final String style,
-                                              @RequestParam(value = "inviteId", required = false) final UUID inviteId) {
+    public ResponseEntity<String> uploadVideo(@RequestBody final JsonNode request) {
 
         try {
-            if (inviteId != null) {
-                userService.deleteInvitation(inviteId);
+            if (request.get("inviteId") != null) {
+                userService.deleteInvitation(UUID.fromString(request.get("inviteId").asText()));
             }
-            userService.saveVideo(file, email1, email2, style);
+            userService.saveVideo((MultipartFile) request.get("file"), request.get("fighterEmail1").asText(), request.get("fighterEmail2").asText(), request.get("style").asText());
             return ResponseEntity.ok("success");
         } catch (Exception e) {
             log.error("Error during trying to send video on review", e);
@@ -39,9 +36,9 @@ public class UserController {
         }
     }
     @PostMapping(value = "uploadPhoto")
-    public ResponseEntity<String> uploadPhoto(@RequestParam("file") final MultipartFile file, @RequestParam("email") final String email) {
+    public ResponseEntity<String> uploadPhoto(@RequestBody final JsonNode request) {
         try {
-            userService.savePhoto(file, email);
+            userService.savePhoto((MultipartFile) request.get("file"), request.get("email").asText());
             return ResponseEntity.ok("success");
         } catch (Exception e) {
             log.error("Error during trying to send video on review", e);
