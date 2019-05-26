@@ -148,10 +148,10 @@ public class UserService implements UserDetailsService {
             criteria.and("surname").regex(searchCriteria.getSurname(), "i");
         }
         if (searchCriteria.getCountry() != null) {
-            criteria.and("country.id").is(searchCriteria.getCountry());
+            criteria.and("country").is(searchCriteria.getCountry());
         }
         if (searchCriteria.getCity() != null) {
-            criteria.and("city.id").is(searchCriteria.getCity());
+            criteria.and("city").is(searchCriteria.getCity());
         }
         final Query query = new Query(criteria);
         query.fields().include("email").include("name").include("surname").include("city").include("country").include("description");
@@ -204,9 +204,7 @@ public class UserService implements UserDetailsService {
     }
 
     public List<Country> findAllCountries() {
-        return operations.find(new Query().with(new Sort(Sort.Direction.ASC, "name")), Country.class).stream()
-                .peek(country -> country.setCities(country.getCities().stream().sorted(Comparator.comparing(City::getName)).collect(Collectors.toList())))
-                .collect(Collectors.toList());
+        return operations.find(new Query().with(new Sort(Sort.Direction.ASC, "name")), Country.class);
     }
 
     public SearchResponse<InvitesDTO> getInvitesForUser(final String email, final int page) {
@@ -342,5 +340,9 @@ public class UserService implements UserDetailsService {
         final AppUser user = findUserByEmail(email);
         user.setUnreadedMessages(0);
         operations.save(user);
+    }
+
+    public List<City> getCities(final String country) {
+        return operations.find(Query.query(new Criteria().and("country").is(country)), City.class);
     }
 }

@@ -34,6 +34,11 @@ public class UtilController {
         return userService.findAllCountries();
     }
 
+    @GetMapping(value = "getCities")
+    public List<City> getCities(@RequestParam("country") final String country) {
+        return userService.getCities(country);
+    }
+
     @PostMapping(value = "findUser")
     public ResponseEntity findUserByEmail(@RequestBody final JsonNode email) {
         return ResponseEntity.ok(mapper.map(userService.findUserByEmail(email.get("email").asText()), UserDTO.class));
