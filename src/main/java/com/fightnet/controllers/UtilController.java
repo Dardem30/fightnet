@@ -18,6 +18,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "util/")
@@ -107,5 +108,9 @@ public class UtilController {
     @PostMapping(value = "resetMessages")
     public void resetMessages(@RequestBody final JsonNode email) {
         userService.resetMessages(email.get("email").asText());
+    }
+    @PostMapping(value = "getCommentsPhotos")
+    public Map<String, String> getCommentsPhotos(@RequestBody final JsonNode emails) {
+        return userService.getCommentsPhotos(emails.get("emails"));
     }
 }

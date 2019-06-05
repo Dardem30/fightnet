@@ -1,6 +1,7 @@
 package com.fightnet.services;
 
 import com.auth0.jwt.JWT;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fightnet.FightnetApplication;
 import com.fightnet.controllers.dto.BookedUser;
 import com.fightnet.controllers.dto.InvitesDTO;
@@ -154,7 +155,7 @@ public class UserService implements UserDetailsService {
             criteria.and("city").is(searchCriteria.getCity());
         }
         final Query query = new Query(criteria);
-        query.fields().include("email").include("name").include("surname").include("city").include("country").include("description");
+        query.fields().include("email").include("name").include("surname").include("city").include("country").include("description").include("mainPhoto");
         response.setCount(operations.count(query, AppUser.class));
         response.setRecords(operations.find(query.skip(pageSize * (searchCriteria.getPageNum() - 1)).limit(pageSize), AppUser.class));
         return response;
@@ -344,5 +345,15 @@ public class UserService implements UserDetailsService {
 
     public List<City> getCities(final String country) {
         return operations.find(Query.query(new Criteria().and("country").is(country)), City.class);
+    }
+
+    public Map<String, String> getCommentsPhotos(final JsonNode jsonEmails) {
+        final List<String> emails = new ArrayList<>();
+        for (final JsonNode email : jsonEmails) {
+            emails.add(email.asText());
+        }
+        final Query query = new Query(new Criteria().and("email").in(emails));
+        query.fields().include("mainPhoto").include("email");
+        return operations.find(query, AppUser.class).stream().collect(Collectors.toMap(AppUser::getEmail, AppUser::getMainPhoto));
     }
 }
