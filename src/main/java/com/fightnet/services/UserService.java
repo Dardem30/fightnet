@@ -194,12 +194,13 @@ public class UserService implements UserDetailsService {
         operations.save(user);
         final Notification notification = new Notification();
         notification.setEmail(user.getEmail());
-        notification.setText(invite.getFighterInvited().getName() + " " +
-                invite.getFighterInvited().getSurname() + " invite you on date " +
+        notification.setText(invite.getFighterInviter().getName() + " " +
+                invite.getFighterInviter().getSurname() + " invites you on date " +
                 formatter.format(invite.getDate()) + ". Fight style: " + invite.getFightStyle());
         notification.setLongitude(invite.getLongitude());
         notification.setLatitude(invite.getLatitude());
         notification.setReaded(false);
+        notification.setCreateTime(new Date());
         operations.save(notification);
         createUpdateInvitation(invite);
     }
