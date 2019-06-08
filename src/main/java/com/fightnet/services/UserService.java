@@ -357,4 +357,14 @@ public class UserService implements UserDetailsService {
         query.fields().include("mainPhoto").include("email");
         return operations.find(query, AppUser.class).stream().collect(Collectors.toMap(AppUser::getEmail, AppUser::getMainPhoto));
     }
+
+    public void updateChangableInfoToUser(final AppUser user) {
+        final AppUser rootUser = operations.findById(user.getEmail(), AppUser.class);
+        rootUser.setCity(user.getCity());
+        rootUser.setCountry(user.getCountry());
+        rootUser.setWeight(user.getWeight());
+        rootUser.setGrowth(user.getGrowth());
+        rootUser.setDescription(user.getDescription());
+        operations.save(rootUser);
+    }
 }

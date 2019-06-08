@@ -113,4 +113,8 @@ public class UtilController {
     public Map<String, String> getCommentsPhotos(@RequestBody final JsonNode emails) {
         return userService.getCommentsPhotos(emails.get("emails"));
     }
+    @PostMapping(value = "updateChangableInfoToUser")
+    public void updateChangableInfoToUser(@RequestBody final AppUser user) {
+        userService.updateChangableInfoToUser(user);
+    }
 }

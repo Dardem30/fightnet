@@ -67,13 +67,13 @@ public class Scheduler {
     public void removeNotifications() throws ParseException {
         operations.findAndRemove(Query.query(new Criteria().and("readed").is(true)
                 .and("createTime").lt(new SimpleDateFormat("yyyy-MM-dd").parse(LocalDate.now().minusDays(1).toString()))), Notification.class);
-        log.info("Scheduler successfully remove all old notifications");
+        log.info("Scheduler successfully removed all old notifications");
     }
 
     @Scheduled(cron = "0 0 1 * * ?")
     public void removeUnregisteredUsers() throws ParseException {
         operations.findAndRemove(Query.query(new Criteria().and("registered").is(false)
                 .and("createTime").lt(new SimpleDateFormat("yyyy-MM-dd").parse(LocalDate.now().minusDays(1).toString()))), AppUser.class);
-        log.info("Scheduler successfully remove unregistered users");
+        log.info("Scheduler successfully removed unregistered users");
     }
 }
