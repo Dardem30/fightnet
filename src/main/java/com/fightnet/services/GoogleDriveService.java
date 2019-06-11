@@ -13,6 +13,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
+import com.google.api.services.drive.model.FileList;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -55,6 +56,16 @@ public class GoogleDriveService {
     }
 
     public void sendFile(final MultipartFile file, final String fileName) throws Exception {
+        FileList result = drive.files().list().setPageSize(10).setFields("nextPageToken, files(id, name)").execute();
+        List<com.google.api.services.drive.model.File> files = result.getFiles();
+        if (files == null || files.isEmpty()) {
+            System.out.println("No files found.");
+        } else {
+            System.out.println("Files:");
+            for (com.google.api.services.drive.model.File fileq : files) {
+                System.out.printf("%s (%s)\n", fileq.getName(), fileq.getId());
+            }
+        }
         final File dummyFile = new File(fileName);
         dummyFile.createNewFile();
         file.transferTo(dummyFile);
