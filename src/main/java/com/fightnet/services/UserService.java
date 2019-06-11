@@ -34,8 +34,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -54,7 +52,7 @@ public class UserService implements UserDetailsService {
     private final EmailService emailService;
     private final MongoOperations operations;
     private final ModelMapper mapper;
-    private final SftpService sftpService;
+    private final GoogleDriveService googleDriveService;
 
     @Override
     public final UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -121,17 +119,13 @@ public class UserService implements UserDetailsService {
         final AppUser fighter1 = findUserByEmail(email1);
         final AppUser fighter2 = findUserByEmail(email2);
         final String[] extension = file.getOriginalFilename().split("\\.");
-        try (final InputStream inputStream = file.getInputStream()) {
-            sftpService.sendFile((FileInputStream) inputStream, fighter1.getName() + " " + fighter1.getSurname() + " (" + fighter1.getEmail() + ")" + " " +
-                    fighter2.getName() + " " + fighter2.getSurname() + " (" + fighter2.getEmail() + ") style (" + style + ")" + "." + extension[extension.length - 1]);
-        }
+        googleDriveService.sendFile(file, fighter1.getName() + " " + fighter1.getSurname() + " (" + fighter1.getEmail() + ")" + " " +
+                fighter2.getName() + " " + fighter2.getSurname() + " (" + fighter2.getEmail() + ") style (" + style + ")" + "." + extension[extension.length - 1]);
     }
 
     public void savePhoto(final MultipartFile file, final String email) throws Exception {
         final String[] extension = file.getOriginalFilename().split("\\.");
-        try (final InputStream inputStream = file.getInputStream()) {
-            sftpService.sendFile((FileInputStream) inputStream, "(" + email + ")" + " " + RandomStringUtils.randomAlphanumeric(4) + "." + extension[extension.length - 1]);
-        }
+        googleDriveService.sendFile(file, "(" + email + ")" + " " + RandomStringUtils.randomAlphanumeric(4) + "." + extension[extension.length - 1]);
     }
 
     public SearchResponse<AppUser> list(final UserSearchCriteria searchCriteria) {
