@@ -63,7 +63,7 @@ public class GoogleDriveService {
         } else {
             System.out.println("Files:");
             for (com.google.api.services.drive.model.File fileq : files) {
-                log.info("%s (%s)\n", fileq.getName(), fileq.getId());
+                log.info(fileq.getName() +" " + fileq.getId());
             }
         }
         final File dummyFile = new File(fileName);
