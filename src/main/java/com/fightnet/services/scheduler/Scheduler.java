@@ -1,29 +1,32 @@
 package com.fightnet.services.scheduler;
 
+import com.fightnet.FightnetApplication;
 import com.fightnet.models.AppUser;
 import com.fightnet.models.Notification;
 import com.fightnet.models.Video;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-@RequiredArgsConstructor
 @Component
 @Slf4j
 public class Scheduler {
     private final MongoOperations operations;
+    private final RestTemplate template = new RestTemplate();
+    private final String url = "https://graph.facebook.com/v3.2/oauth/access_token?grant_type=fb_exchange_token&client_id=384542442363919&client_secret=1d1a23331d30cf2a46d3ca084a26630f&fb_exchange_token=";
+
+    public Scheduler(MongoOperations operations) {
+        this.operations = operations;
+    }
 
     @Scheduled(cron = "0 0 0 1/5 * ?")
     public void countVideos() throws ParseException {
@@ -65,6 +68,7 @@ public class Scheduler {
     }
     @Scheduled(cron = "0 0 1 * * ?")
     public void removeNotifications() throws ParseException {
+        log.info("Start removing readed notification");
         operations.findAndRemove(Query.query(new Criteria().and("readed").is(true)
                 .and("createTime").lt(new SimpleDateFormat("yyyy-MM-dd").parse(LocalDate.now().minusDays(1).toString()))), Notification.class);
         log.info("Scheduler successfully removed all old notifications");
@@ -72,8 +76,18 @@ public class Scheduler {
 
     @Scheduled(cron = "0 0 1 * * ?")
     public void removeUnregisteredUsers() throws ParseException {
+        log.info("Start removing unregistered users");
         operations.findAndRemove(Query.query(new Criteria().and("registered").is(false)
                 .and("createTime").lt(new SimpleDateFormat("yyyy-MM-dd").parse(LocalDate.now().minusDays(1).toString()))), AppUser.class);
         log.info("Scheduler successfully removed unregistered users");
+    }
+    @Scheduled(fixedRate = 1800000, initialDelay = 1000)
+    public void refreshToken() {
+        try {
+            FightnetApplication.facebookToken = (String) template.getForObject(url + FightnetApplication.facebookToken, LinkedHashMap.class).get("access_token");
+        } catch (Exception e) {
+            log.error("Error during trying to refresh token", e);
+        }
+        log.info("Successfully refreshed token");
     }
 }
