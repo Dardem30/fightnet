@@ -22,6 +22,7 @@ public class UserDTO {
     private Map<String, Integer> loses;
     private Set<String> photos;
     private String mainPhoto;
+    private String preferredKind;
     private String weight;
     private String growth;
     private Integer notifications;

@@ -5,6 +5,7 @@ import com.fightnet.controllers.dto.BookedUser;
 import com.fightnet.controllers.dto.InvitesDTO;
 import com.fightnet.controllers.dto.UserDTO;
 import com.fightnet.controllers.dto.VideoDTO;
+import com.fightnet.controllers.search.MapSearchCriteria;
 import com.fightnet.controllers.search.SearchResponse;
 import com.fightnet.controllers.search.UserSearchCriteria;
 import com.fightnet.controllers.search.VideoSearchCriteria;
@@ -70,9 +71,9 @@ public class UtilController {
         return ResponseEntity.ok(userService.getInvitesForUser(request.get("email").asText(), request.get("page").asInt()));
     }
 
-    @GetMapping(value = "getMarkers")
-    public ResponseEntity<List<InvitesDTO>> getMarkers() {
-        return ResponseEntity.ok(userService.getMarkers());
+    @PostMapping(value = "getMarkers")
+    public ResponseEntity<List<InvitesDTO>> getMarkers(@RequestBody final MapSearchCriteria searchCriteria) {
+        return ResponseEntity.ok(userService.getMarkers(searchCriteria));
     }
 
     @PostMapping(value = "acceptInvite")

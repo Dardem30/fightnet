@@ -11,4 +11,7 @@ public class UserSearchCriteria {
     private String city;
     private String searcherEmail;
     private int pageNum;
+    private String preferredKind;
+    private String width;
+    private String height;
 }

@@ -6,6 +6,7 @@ import com.fightnet.FightnetApplication;
 import com.fightnet.controllers.dto.BookedUser;
 import com.fightnet.controllers.dto.InvitesDTO;
 import com.fightnet.controllers.dto.VideoDTO;
+import com.fightnet.controllers.search.MapSearchCriteria;
 import com.fightnet.controllers.search.SearchResponse;
 import com.fightnet.controllers.search.UserSearchCriteria;
 import com.fightnet.controllers.search.VideoSearchCriteria;
@@ -148,6 +149,15 @@ public class UserService implements UserDetailsService {
         if (searchCriteria.getCity() != null) {
             criteria.and("city").is(searchCriteria.getCity());
         }
+        if (searchCriteria.getHeight() != null) {
+            criteria.and("growth").is(searchCriteria.getHeight());
+        }
+        if (searchCriteria.getWidth() != null) {
+            criteria.and("weight").is(searchCriteria.getWidth());
+        }
+        if (searchCriteria.getPreferredKind() != null) {
+            criteria.and("preferredKind").is(searchCriteria.getPreferredKind());
+        }
         final Query query = new Query(criteria);
         query.fields().include("email").include("name").include("surname").include("city").include("country").include("description").include("mainPhoto");
         response.setCount(operations.count(query, AppUser.class));
@@ -205,15 +215,33 @@ public class UserService implements UserDetailsService {
 
     public SearchResponse<InvitesDTO> getInvitesForUser(final String email, final int page) {
         final SearchResponse<InvitesDTO> response = new SearchResponse<>();
-        final Query query = Query.query(new Criteria().and("fighterInvited.$id").is(email).and("accepted").is(false));
+        final Query query = Query.query(new Criteria().and("fighterInvited._id").is(email).and("accepted").is(false));
         response.setCount(operations.count(query, Invites.class));
         response.setRecords(operations.find(query.skip(pageSize * (page - 1)).limit(pageSize), Invites.class).stream().map(invite -> mapper.map(invite, InvitesDTO.class)).collect(Collectors.toList()));
         return response;
     }
 
 
-    public List<InvitesDTO> getMarkers() {
-        return operations.find(new Query(new Criteria().and("accepted").is(true)), Invites.class).stream().map(invite -> mapper.map(invite, InvitesDTO.class)).collect(Collectors.toList());
+    public List<InvitesDTO> getMarkers(final MapSearchCriteria searchCriteria) {
+        final Criteria criteria = new Criteria();
+        criteria.and("accepted").is(true);
+        if (searchCriteria.getName() != null) {
+            criteria.orOperator(Criteria.where("fighterInviter.name").regex(searchCriteria.getName(), "i"),
+                    Criteria.where("fighterInvited.name").regex(searchCriteria.getName(), "i"),
+                    Criteria.where("fighterInviter.surname").regex(searchCriteria.getName(), "i"),
+                    Criteria.where("fighterInvited.surname").regex(searchCriteria.getName(), "i"));
+        }
+        if (searchCriteria.getFightStyle() != null) {
+            criteria.and("fightStyle").is(searchCriteria.getFightStyle());
+        }
+        if (searchCriteria.getStartDate() != null && searchCriteria.getEndDate() != null) {
+            criteria.and("date").gte(searchCriteria.getStartDate()).lte(searchCriteria.getEndDate());
+        } else if (searchCriteria.getStartDate() != null) {
+            criteria.and("date").gte(searchCriteria.getStartDate());
+        } else if (searchCriteria.getEndDate() != null) {
+            criteria.and("date").lte(searchCriteria.getStartDate());
+        }
+        return operations.find(new Query(criteria), Invites.class).stream().map(invite -> mapper.map(invite, InvitesDTO.class)).collect(Collectors.toList());
     }
 
     public void acceptInvite(final Invites invite) {
@@ -359,6 +387,7 @@ public class UserService implements UserDetailsService {
         rootUser.setWeight(user.getWeight());
         rootUser.setGrowth(user.getGrowth());
         rootUser.setDescription(user.getDescription());
+        rootUser.setPreferredKind(user.getPreferredKind());
         operations.save(rootUser);
     }
 }

@@ -3,7 +3,6 @@ package com.fightnet.models;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -15,9 +14,7 @@ import java.util.UUID;
 public class Invites {
     @Id
     private UUID id;
-    @DBRef
     private AppUser fighterInviter;
-    @DBRef
     private AppUser fighterInvited;
     private float latitude;
     private float longitude;
