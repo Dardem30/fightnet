@@ -135,13 +135,10 @@ public class UserService implements UserDetailsService {
         criteria.and("registered").is(true);
         criteria.and("email").ne(searchCriteria.getSearcherEmail());
         if (searchCriteria.getName() != null) {
-            criteria.and("name").regex(searchCriteria.getName(), "i");
+            criteria.orOperator(Criteria.where("name").regex(searchCriteria.getName(), "i"), Criteria.where("surname").regex(searchCriteria.getName(), "i"));
         }
         if (searchCriteria.getDescription() != null) {
             criteria.and("description").regex(searchCriteria.getDescription(), "i");
-        }
-        if (searchCriteria.getSurname() != null) {
-            criteria.and("surname").regex(searchCriteria.getSurname(), "i");
         }
         if (searchCriteria.getCountry() != null) {
             criteria.and("country").is(searchCriteria.getCountry());
