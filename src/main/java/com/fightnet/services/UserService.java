@@ -264,7 +264,7 @@ public class UserService implements UserDetailsService {
     public List<InvitesDTO> getPlannedFights(final String email) {
         final Criteria criteria = new Criteria();
         criteria.and("accepted").is(true);
-        criteria.orOperator(Criteria.where("fighterInviter.$id").is(email), Criteria.where("fighterInvited.$id").is(email));
+        criteria.orOperator(Criteria.where("fighterInviter._id").is(email), Criteria.where("fighterInvited._id").is(email));
         return operations.find(Query.query(criteria), Invites.class).stream().map(invite -> mapper.map(invite, InvitesDTO.class)).collect(Collectors.toList());
     }
 
