@@ -214,7 +214,7 @@ public class UserService implements UserDetailsService {
         final SearchResponse<InvitesDTO> response = new SearchResponse<>();
         final Query query = Query.query(new Criteria().and("fighterInvited._id").is(email).and("accepted").is(false));
         response.setCount(operations.count(query, Invites.class));
-        response.setRecords(operations.find(query.skip(pageSize * (page - 1)).limit(pageSize), Invites.class).stream().map(invite -> mapper.map(invite, InvitesDTO.class)).collect(Collectors.toList()));
+        response.setRecords(operations.find(query.skip(3 * (page - 1)).limit(3), Invites.class).stream().map(invite -> mapper.map(invite, InvitesDTO.class)).collect(Collectors.toList()));
         return response;
     }
 
@@ -245,7 +245,7 @@ public class UserService implements UserDetailsService {
         final Notification notification = new Notification();
         notification.setEmail(invite.getFighterInviter().getEmail());
         notification.setText(invite.getFighterInvited().getName() + " " +
-                invite.getFighterInvited().getSurname() + " accept your invitation on date " +
+                invite.getFighterInvited().getSurname() + " <b style='color: green'>accepted</b> your invitation on date " +
                 formatter.format(invite.getDate()) + ". Fight style: " + invite.getFightStyle());
         notification.setLongitude(invite.getLongitude());
         notification.setLatitude(invite.getLatitude());
@@ -255,14 +255,18 @@ public class UserService implements UserDetailsService {
     }
 
     public List<Notification> getNotifications(final String email) {
-        return operations.find(Query.query(new Criteria().and("email").is(email)), Notification.class);
+        return operations.find(Query.query(new Criteria().and("email").is(email)).with(new Sort(Sort.Direction.ASC, "createTime")), Notification.class);
     }
 
-    public List<InvitesDTO> getPlannedFights(final String email) {
+    public SearchResponse<InvitesDTO> getPlannedFights(final String email, final Integer page) {
+        final SearchResponse<InvitesDTO> response = new SearchResponse<>();
         final Criteria criteria = new Criteria();
         criteria.and("accepted").is(true);
         criteria.orOperator(Criteria.where("fighterInviter._id").is(email), Criteria.where("fighterInvited._id").is(email));
-        return operations.find(Query.query(criteria), Invites.class).stream().map(invite -> mapper.map(invite, InvitesDTO.class)).collect(Collectors.toList());
+        final Query query = new Query(criteria);
+        response.setCount(operations.count(query, Invites.class));
+        response.setRecords(operations.find(query.skip(3 * (page - 1)).limit(3), Invites.class).stream().map(invite -> mapper.map(invite, InvitesDTO.class)).collect(Collectors.toList()));
+        return response;
     }
 
     public void deleteInvitation(final UUID inviteId) {
@@ -386,5 +390,20 @@ public class UserService implements UserDetailsService {
         rootUser.setDescription(user.getDescription());
         rootUser.setPreferredKind(user.getPreferredKind());
         operations.save(rootUser);
+    }
+
+    public String declineInvite(final UUID inviteId) {
+        final Invites invite = operations.findById(inviteId, Invites.class);
+        operations.remove(invite);
+        final Notification notification = new Notification();
+        notification.setEmail(invite.getFighterInviter().getEmail());
+        notification.setText(invite.getFighterInvited().getName() + " " +
+                invite.getFighterInvited().getSurname() + " <b style='color: red'>declined</b> your invitation on date " +
+                formatter.format(invite.getDate()) + ". Fight style: " + invite.getFightStyle());
+        notification.setLongitude(invite.getLongitude());
+        notification.setLatitude(invite.getLatitude());
+        notification.setReaded(false);
+        operations.save(notification);
+        return invite.getFighterInviter().getEmail();
     }
 }

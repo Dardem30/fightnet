@@ -13,6 +13,7 @@ public class InvitesDTO {
     private float latitude;
     private float longitude;
     private String fightStyle;
+    private String comment;
     private Date date;
     private boolean accepted;
 }

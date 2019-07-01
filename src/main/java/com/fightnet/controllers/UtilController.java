@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "util/")
@@ -81,6 +82,10 @@ public class UtilController {
         userService.acceptInvite(invite);
         simpMessagingTemplate.convertAndSend("/socket-publisher/invite/" + invite.getFighterInviter().getEmail(), true);
     }
+    @PostMapping(value = "declineInvite")
+    public void declineInvite(@RequestParam("inviteId") final String inviteId) {
+        simpMessagingTemplate.convertAndSend("/socket-publisher/invite/" + userService.declineInvite(UUID.fromString(inviteId)), true);
+    }
 
     @PostMapping(value = "getNotifications")
     public List<Notification> getNotifications(@RequestBody final JsonNode email) {
@@ -88,8 +93,8 @@ public class UtilController {
     }
 
     @PostMapping(value = "getPlannedFights")
-    public List<InvitesDTO> getPlannedFights(@RequestBody final JsonNode email) {
-        return userService.getPlannedFights(email.get("email").asText());
+    public SearchResponse<InvitesDTO> getPlannedFights(@RequestBody final JsonNode node) {
+        return userService.getPlannedFights(node.get("email").asText(), node.get("page").asInt());
     }
 
     @PostMapping(value = "getVideos")
