@@ -274,7 +274,7 @@ public class UserService implements UserDetailsService {
     }
 
     private String uploadToFacebook(final MultipartFile file, final String uploadPath) throws Exception {
-        final FacebookClient client = new DefaultFacebookClient(FightnetApplication.facebookToken, Version.VERSION_2_8);
+        final FacebookClient client = new DefaultFacebookClient(FightnetApplication.facebookToken, Version.VERSION_3_2);
 
         final FacebookType response = client.publish(uploadPath, FacebookType.class,
                 BinaryAttachment.with(file.getOriginalFilename(), file.getInputStream()));
@@ -310,7 +310,7 @@ public class UserService implements UserDetailsService {
         log.info("Uploading photo to facebook....");
         final String photoId = uploadToFacebook(file, "me/photos");
         if (photoId != null) {
-            final String photoUrl = "https://www.facebook.com/2105724756385939/photos/" + photoId;
+            final String photoUrl = "https://graph.facebook.com/v3.2/" + photoId + "/picture?access_token=";
             final Pattern pattern = Pattern.compile("\\(.*?\\)");
             final Matcher matcher = pattern.matcher(file.getOriginalFilename());
             matcher.find();

@@ -1,6 +1,7 @@
 package com.fightnet.controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fightnet.FightnetApplication;
 import com.fightnet.controllers.dto.BookedUser;
 import com.fightnet.controllers.dto.InvitesDTO;
 import com.fightnet.controllers.dto.UserDTO;
@@ -122,5 +123,9 @@ public class UtilController {
     @PostMapping(value = "updateChangableInfoToUser")
     public void updateChangableInfoToUser(@RequestBody final AppUser user) {
         userService.updateChangableInfoToUser(user);
+    }
+    @GetMapping(value = "getFacebookAccessToken")
+    public ResponseEntity<String> getFacebookAccessToken() {
+        return ResponseEntity.ok(FightnetApplication.facebookToken);
     }
 }

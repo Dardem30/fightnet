@@ -22,7 +22,7 @@ import java.util.*;
 public class Scheduler {
     private final MongoOperations operations;
     private final RestTemplate template = new RestTemplate();
-    private final String url = "https://graph.facebook.com/v3.2/oauth/access_token?grant_type=fb_exchange_token&client_id=384542442363919&client_secret=1d1a23331d30cf2a46d3ca084a26630f&fb_exchange_token=";
+    private final String url = "https://graph.facebook.com/v3.2/oauth/access_token?grant_type=fb_exchange_token&client_id=509252213177625&client_secret=ed343ac1b434304f3b53d864c41f2cd4&fb_exchange_token=";
 
     public Scheduler(MongoOperations operations) {
         this.operations = operations;
