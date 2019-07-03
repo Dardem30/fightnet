@@ -27,7 +27,7 @@ public class AppUser implements UserDetails {
     private Set<Role> roles;
     @DBRef
     private Set<Video> videos;
-    private Set<String> photos;
+    private List<String> photos;
     private String mainPhoto;
     private String country;
     private String city;

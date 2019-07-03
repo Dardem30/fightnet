@@ -58,7 +58,7 @@ public class MessageService {
         return latestMassagesMap.entrySet().stream()
                 .map(entry -> {
                     final AppUser user = operations.findById(entry.getKey(), AppUser.class);
-                    return entry.getValue().setTitleName(user.getName() + " " + user.getSurname());
+                    return entry.getValue().setPhoto(user.getMainPhoto()).setTitleName(user.getName() + " " + user.getSurname());
                 })
                 .sorted(Comparator.comparing(Message::getDate).reversed())
                 .collect(Collectors.toList());

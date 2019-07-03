@@ -67,6 +67,10 @@ public class UtilController {
     public ResponseEntity<List<BookedUser>> getBookedPersons(@RequestBody final JsonNode currentUserEmail) {
         return ResponseEntity.ok(userService.getBookedPersons(currentUserEmail.get("currentUserEmail").asText()));
     }
+    @PostMapping(value = "makeMainPhoto")
+    public void makeMainPhoto(@RequestBody final JsonNode makeMainPhotoForm) {
+        userService.makeMainPhoto(makeMainPhotoForm.get("email").asText(), makeMainPhotoForm.get("indexOfPhoto").asInt());
+    }
 
     @PostMapping(value = "getInvitesForUser")
     public ResponseEntity<SearchResponse<InvitesDTO>> getInvitesForUser(@RequestBody final JsonNode request) {

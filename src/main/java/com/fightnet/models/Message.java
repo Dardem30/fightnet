@@ -15,6 +15,8 @@ public class Message {
     private Date date;
     @Transient
     private String titleName;
+    @Transient
+    private String photo;
 
     public String getTitleName() {
         return titleName;
@@ -22,6 +24,15 @@ public class Message {
 
     public Message setTitleName(String titleName) {
         this.titleName = titleName;
+        return this;
+    }
+
+    public String getPhoto() {
+        return photo;
+    }
+
+    public Message setPhoto(String photo) {
+        this.photo = photo;
         return this;
     }
 }

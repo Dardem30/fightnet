@@ -214,7 +214,9 @@ public class UserService implements UserDetailsService {
         final SearchResponse<InvitesDTO> response = new SearchResponse<>();
         final Query query = Query.query(new Criteria().and("fighterInvited._id").is(email).and("accepted").is(false));
         response.setCount(operations.count(query, Invites.class));
-        response.setRecords(operations.find(query.skip(3 * (page - 1)).limit(3), Invites.class).stream().map(invite -> mapper.map(invite, InvitesDTO.class)).collect(Collectors.toList()));
+        response.setRecords(operations.find(query.skip(3 * (page - 1)).limit(3), Invites.class).stream()
+                .peek(invite -> invite.getFighterInviter().setMainPhoto(findUserByEmail(invite.getFighterInviter().getEmail()).getMainPhoto()))
+                .map(invite -> mapper.map(invite, InvitesDTO.class)).collect(Collectors.toList()));
         return response;
     }
 
@@ -265,7 +267,15 @@ public class UserService implements UserDetailsService {
         criteria.orOperator(Criteria.where("fighterInviter._id").is(email), Criteria.where("fighterInvited._id").is(email));
         final Query query = new Query(criteria);
         response.setCount(operations.count(query, Invites.class));
-        response.setRecords(operations.find(query.skip(3 * (page - 1)).limit(3), Invites.class).stream().map(invite -> mapper.map(invite, InvitesDTO.class)).collect(Collectors.toList()));
+        response.setRecords(operations.find(query.skip(3 * (page - 1)).limit(3), Invites.class).stream()
+                .peek(invite ->  {
+                    if (invite.getFighterInviter().getEmail().equals(email)) {
+                        invite.getFighterInvited().setMainPhoto(findUserByEmail(invite.getFighterInvited().getEmail()).getMainPhoto());
+                    } else {
+                        invite.getFighterInviter().setMainPhoto(findUserByEmail(invite.getFighterInviter().getEmail()).getMainPhoto());
+                    }
+                })
+                .map(invite -> mapper.map(invite, InvitesDTO.class)).collect(Collectors.toList()));
         return response;
     }
 
@@ -315,7 +325,7 @@ public class UserService implements UserDetailsService {
             final Matcher matcher = pattern.matcher(file.getOriginalFilename());
             matcher.find();
             final AppUser user = operations.findById(matcher.group().replace("(", "").replace(")", ""), AppUser.class);
-            final Set<String> photos = user.getPhotos() == null ? new HashSet<>() : user.getPhotos();
+            final List<String> photos = user.getPhotos() == null ? new ArrayList<>() : user.getPhotos();
             if (user.getMainPhoto() == null) {
                 user.setMainPhoto(photoUrl);
             }
@@ -378,7 +388,7 @@ public class UserService implements UserDetailsService {
         }
         final Query query = new Query(new Criteria().and("email").in(emails));
         query.fields().include("mainPhoto").include("email");
-        return operations.find(query, AppUser.class).stream().collect(Collectors.toMap(AppUser::getEmail, AppUser::getMainPhoto));
+        return operations.find(query, AppUser.class).stream().collect(Collectors.toMap(AppUser::getEmail, user -> user.getMainPhoto() == null ? "null" : user.getMainPhoto()));
     }
 
     public void updateChangableInfoToUser(final AppUser user) {
@@ -405,5 +415,11 @@ public class UserService implements UserDetailsService {
         notification.setReaded(false);
         operations.save(notification);
         return invite.getFighterInviter().getEmail();
+    }
+
+    public void makeMainPhoto(final String email, final int indexOfPhoto) {
+        final AppUser user = findUserByEmail(email);
+        user.setMainPhoto(user.getPhotos().get(indexOfPhoto));
+        operations.save(user);
     }
 }
