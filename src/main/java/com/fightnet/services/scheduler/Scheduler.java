@@ -127,7 +127,7 @@ public class Scheduler {
         } catch (Exception e) {
             log.error("Error during trying to refresh token", e);
             try {
-                service.sendCodeMessage("r.lukashenko@mail.ru", "Error during trying to remove notifications", "error");
+                service.sendCodeMessage("r.lukashenko@mail.ru", "Error during trying to refresh token", "error");
             } catch (final Exception e1) {
                 log.error("Error during trying to send error message", e1);
             }
