@@ -8,7 +8,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @SpringBootApplication
 public class FightnetApplication {
-    public static String facebookToken = "EAAHPKYVEfRkBAM5p86BhZBl6qV2iN9XEhzZBaX1F5RxIa25YNjZCDCzWPZAYB6JCtwWQZBhucNdsO19sJko6hhwCMZCOtN4vCFZCieWQZBfUt6L2GqqeKt8UBmN5AAuGxwqI83djvNcYivoWBfEzc65OqjayRIRxgTNpz2vd1nsk9KGkB2AjZC2uN1WRoR23KxnhZBVnIGOxzTCAZDZD";
+    public static String facebookToken = "EAAHPKYVEfRkBAG5BAiQpFSHAx2ktmO9prnQw30RMFAfm95SY9NzJvT1awJWPMZB2Nj7SZCPjlZCuZAHdcE39T0rdKDQEScIK1whObC89W7d4GEBeh6C6oo7xuMc47QWbTDjNuKfKEX3dGjTNrC3hXPCS1C0u3qKp13G1cUh6eUFqzT6JlULz";
 
     public static void main(String[] args) {
         SpringApplication.run(FightnetApplication.class, args);

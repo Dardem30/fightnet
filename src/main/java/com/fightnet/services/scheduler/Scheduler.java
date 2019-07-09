@@ -1,6 +1,5 @@
 package com.fightnet.services.scheduler;
 
-import com.fightnet.FightnetApplication;
 import com.fightnet.models.AppUser;
 import com.fightnet.models.Notification;
 import com.fightnet.models.Video;
@@ -11,19 +10,19 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 @Slf4j
 public class Scheduler {
     private final MongoOperations operations;
     private final EmailService service;
-    private final RestTemplate template = new RestTemplate();
-    private final String url = "https://graph.facebook.com/v3.2/oauth/access_token?grant_type=fb_exchange_token&client_id=509252213177625&client_secret=ed343ac1b434304f3b53d864c41f2cd4&fb_exchange_token=";
 
     public Scheduler(final MongoOperations operations, final EmailService service) {
         this.operations = operations;
@@ -119,20 +118,5 @@ public class Scheduler {
             throw new RuntimeException();
         }
         log.info("Scheduler successfully removed unregistered users");
-    }
-    @Scheduled(fixedRate = 1800000, initialDelay = 1000)
-    public void refreshToken() {
-        try {
-            FightnetApplication.facebookToken = (String) template.getForObject(url + FightnetApplication.facebookToken, LinkedHashMap.class).get("access_token");
-        } catch (Exception e) {
-            log.error("Error during trying to refresh token", e);
-            try {
-                service.sendCodeMessage("r.lukashenko@mail.ru", "Error during trying to refresh token", "error");
-            } catch (final Exception e1) {
-                log.error("Error during trying to send error message", e1);
-            }
-            throw new RuntimeException();
-        }
-        log.info("Successfully refreshed token");
     }
 }
