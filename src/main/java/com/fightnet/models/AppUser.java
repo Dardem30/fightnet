@@ -22,6 +22,7 @@ public class AppUser implements UserDetails {
     private String weight;
     private String growth;
     private String code;
+    private String age;
     private String preferredKind;
     @DBRef
     private Set<Role> roles;

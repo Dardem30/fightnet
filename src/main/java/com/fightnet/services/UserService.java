@@ -156,7 +156,7 @@ public class UserService implements UserDetailsService {
             criteria.and("preferredKind").is(searchCriteria.getPreferredKind());
         }
         final Query query = new Query(criteria);
-        query.fields().include("email").include("name").include("surname").include("city").include("country").include("description").include("mainPhoto");
+        query.fields().include("email").include("name").include("growth").include("weight").include("age").include("preferredKind").include("surname").include("city").include("country").include("description").include("mainPhoto");
         response.setCount(operations.count(query, AppUser.class));
         response.setRecords(operations.find(query.skip(pageSize * (searchCriteria.getPageNum() - 1)).limit(pageSize), AppUser.class));
         return response;
